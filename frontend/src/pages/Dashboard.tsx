@@ -13,12 +13,6 @@ export default function Dashboard() {
     useTransfer();
   const [selectedFiles, setSelectedFiles] = useState<DriveFile[]>([]);
 
-  // Redirect if not connected
-  if (!isFullyConnected || !sourceAccount || !destinationAccount) {
-    navigate('/login');
-    return null;
-  }
-
   const handleRemoveFile = useCallback(
     (fileId: string) => {
       setSelectedFiles((prev) => prev.filter((f) => f.id !== fileId));
@@ -41,6 +35,12 @@ export default function Dashboard() {
       destinationAccount.token,
     );
   }, [selectedFiles, sourceAccount, destinationAccount, startTransfers]);
+
+  // Redirect if not connected (must be after all hooks)
+  if (!isFullyConnected || !sourceAccount || !destinationAccount) {
+    navigate('/login');
+    return null;
+  }
 
   return (
     <div className="flex min-h-screen flex-col pt-16">
