@@ -25,6 +25,30 @@ jobs:
           ssh -i ~/.ssh/ec2_key ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'DEPLOY_SCRIPT'
             set -e
 
+            # ──────────────────────────
+            # Setup Node.js v20
+            # ──────────────────────────
+            # Load NVM to upgrade Node if it exists
+            export NVM_DIR="$HOME/.nvm"
+            if [ -s "$NVM_DIR/nvm.sh" ]; then
+              \. "$NVM_DIR/nvm.sh"
+              nvm install 20
+              nvm use 20
+              nvm alias default 20
+              # Ensure pm2 is available on the new node version
+              npm install -g pm2
+            fi
+            
+            # Verify node version
+            NODE_MAJOR=$(node -v | cut -d. -f1 | sed 's/v//')
+            if [ "$NODE_MAJOR" -lt 20 ]; then
+                echo "❌ Error: Node.js on your EC2 instance is v$NODE_MAJOR. It needs to be >= 20."
+                echo "💡 To fix this manually on EC2, run:"
+                echo "   curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -"
+                echo "   sudo apt-get install -y nodejs"
+                exit 1
+            fi
+
             APP_DIR=~/vaultbridge
 
             # Clone or pull latest code
