@@ -1,0 +1,74 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    name: Deploy to EC2
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/ec2_key
+          chmod 600 ~/.ssh/ec2_key
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Deploy to EC2
+        run: |
+          ssh -i ~/.ssh/ec2_key ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'DEPLOY_SCRIPT'
+            set -e
+
+            APP_DIR=~/vaultbridge
+
+            # Clone or pull latest code
+            if [ ! -d "$APP_DIR" ]; then
+              git clone https://github.com/${{ github.repository }}.git "$APP_DIR"
+            fi
+
+            cd "$APP_DIR"
+            git fetch origin main
+            git reset --hard origin/main
+
+            # ──────────────────────────
+            # Backend
+            # ──────────────────────────
+            echo "Setting up backend..."
+            cd "$APP_DIR/backend"
+            npm install --production
+            npx prisma generate
+
+            # Restart backend with PM2
+            if pm2 describe vaultbridge-backend > /dev/null 2>&1; then
+              pm2 restart vaultbridge-backend
+            else
+              pm2 start npm --name vaultbridge-backend -- run start
+            fi
+
+            # ──────────────────────────
+            # Frontend
+            # ──────────────────────────
+            echo "📦 Setting up frontend..."
+            cd "$APP_DIR/frontend"
+            npm install
+            npm run build
+
+            # Serve frontend static files with PM2
+            if pm2 describe vaultbridge-frontend > /dev/null 2>&1; then
+              pm2 restart vaultbridge-frontend
+            else
+              pm2 start npx --name vaultbridge-frontend -- serve dist -s -l 4173
+            fi
+
+            echo "Deployment complete!"
+          DEPLOY_SCRIPT
+
+      - name: Cleanup SSH key
+        if: always()
+        run: rm -f ~/.ssh/ec2_key
