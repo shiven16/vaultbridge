@@ -39,14 +39,23 @@ jobs:
               npm install -g pm2
             fi
             
-            # Verify node version
+            # Verify node version and force upgrade via apt if needed
             NODE_MAJOR=$(node -v | cut -d. -f1 | sed 's/v//')
             if [ "$NODE_MAJOR" -lt 20 ]; then
-                echo "❌ Error: Node.js on your EC2 instance is v$NODE_MAJOR. It needs to be >= 20."
-                echo "💡 To fix this manually on EC2, run:"
-                echo "   curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -"
-                echo "   sudo apt-get install -y nodejs"
-                exit 1
+                echo "⚠️ Node.js is v$NODE_MAJOR. Upgrading to Node.js v20..."
+                curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+                sudo apt-get install -y nodejs
+                
+                # Re-verify post-install
+                NODE_MAJOR_NEW=$(node -v | cut -d. -f1 | sed 's/v//')
+                if [ "$NODE_MAJOR_NEW" -lt 20 ]; then
+                  echo "❌ Failed to install Node.js v20. Current version is v$NODE_MAJOR_NEW."
+                  exit 1
+                fi
+                echo "✅ Successfully upgraded Node.js to v$NODE_MAJOR_NEW"
+                
+                # Reinstall pm2 globally for the new node version
+                sudo npm install -g pm2
             fi
 
             APP_DIR=~/vaultbridge
