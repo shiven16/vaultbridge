@@ -1,0 +1,27 @@
+name: Health Check API
+baseURL: "http://localhost:3000"
+tests:
+  - name: "Should return 200 OK for health check"
+    request:
+      method: "GET"
+      endpoint: "/health"
+    response:
+      status: 200
+      bodyContains:
+        status: "ok"
+
+  - name: "Should return 404 for unknown route"
+    request:
+      method: "GET"
+      endpoint: "/non-existent"
+    response:
+      status: 404
+
+  - name: "Should reject drive files without token"
+    request:
+      method: "GET"
+      endpoint: "/drive/files"
+    response:
+      status: 401
+      bodyContains:
+        error: "Missing authorization header"

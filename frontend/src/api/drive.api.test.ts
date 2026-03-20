@@ -21,7 +21,7 @@ describe("Drive API Integration", () => {
       nextPageToken: "token123",
     };
 
-    // @ts-ignore - mockResolvedValue is safe here
+    // @ts-expect-error - mockResolvedValue is safe here
     apiClient.get.mockResolvedValueOnce({ data: mockData });
 
     const result = await listFiles("fake-access-token");

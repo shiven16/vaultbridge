@@ -1,0 +1,22 @@
+{
+  "name": "e2e",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test ui/",
+    "test:api": "playwright test api/"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@playwright/test": "^1.58.2",
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^25.5.0",
+    "js-yaml": "^4.1.1",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}
