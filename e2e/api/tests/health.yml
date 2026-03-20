@@ -24,4 +24,4 @@ tests:
     response:
       status: 401
       bodyContains:
-        error: "Missing authorization header"
+        error: "Missing or invalid authorization header"
