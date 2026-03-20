@@ -52,20 +52,13 @@ export async function listFiles(
   };
 }
 
-export async function downloadFileStream(
-  accessToken: string,
-  fileId: string,
-): Promise<Readable> {
+export async function downloadFileStream(accessToken: string, fileId: string): Promise<Readable> {
   const drive = createAuthenticatedDrive(accessToken);
 
   logger.info(`Starting file download stream for fileId: ${fileId}`);
 
   const response = await withRetry(
-    () =>
-      drive.files.get(
-        { fileId, alt: 'media' },
-        { responseType: 'stream' },
-      ),
+    () => drive.files.get({ fileId, alt: 'media' }, { responseType: 'stream' }),
     { maxRetries: 3 },
   );
 

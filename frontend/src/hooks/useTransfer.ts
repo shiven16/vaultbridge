@@ -1,14 +1,14 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback } from "react";
 import {
   createTransfer,
   getTransferStatus,
   type TransferRequest,
-} from '../api/transfer.api';
+} from "../api/transfer.api";
 
 export interface TransferItem {
   fileId: string;
   fileName: string;
-  status: 'pending' | 'in_progress' | 'success' | 'failed';
+  status: "pending" | "in_progress" | "success" | "failed";
   transferId?: string;
   error?: string;
 }
@@ -38,13 +38,13 @@ export function useTransfer() {
       const initialTransfers: TransferItem[] = files.map((f) => ({
         fileId: f.fileId,
         fileName: f.fileName,
-        status: 'pending' as const,
+        status: "pending" as const,
       }));
       setTransfers(initialTransfers);
 
       // Process transfers sequentially
       for (const file of files) {
-        updateTransfer(file.fileId, { status: 'in_progress' });
+        updateTransfer(file.fileId, { status: "in_progress" });
 
         try {
           const req: TransferRequest = {
@@ -57,7 +57,7 @@ export function useTransfer() {
 
           const response = await createTransfer(req);
           updateTransfer(file.fileId, {
-            status: 'in_progress',
+            status: "in_progress",
             transferId: response.transferId,
           });
 
@@ -68,7 +68,7 @@ export function useTransfer() {
             await new Promise((resolve) => setTimeout(resolve, 2000));
             try {
               const status = await getTransferStatus(response.transferId);
-              if (status.status === 'success' || status.status === 'failed') {
+              if (status.status === "success" || status.status === "failed") {
                 updateTransfer(file.fileId, { status: status.status });
                 break;
               }
@@ -80,15 +80,15 @@ export function useTransfer() {
 
           if (attempts >= maxAttempts) {
             updateTransfer(file.fileId, {
-              status: 'failed',
-              error: 'Transfer timed out',
+              status: "failed",
+              error: "Transfer timed out",
             });
           }
         } catch (err) {
           const errorMessage =
-            err instanceof Error ? err.message : 'Transfer failed';
+            err instanceof Error ? err.message : "Transfer failed";
           updateTransfer(file.fileId, {
-            status: 'failed',
+            status: "failed",
             error: errorMessage,
           });
         }

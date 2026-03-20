@@ -17,11 +17,7 @@ export async function listFiles(
   try {
     const query = listFilesSchema.parse(req.query);
 
-    const result = await driveService.listFiles(
-      query.accessToken,
-      query.pageToken,
-      query.pageSize,
-    );
+    const result = await driveService.listFiles(query.accessToken, query.pageToken, query.pageSize);
 
     res.json(result);
   } catch (error) {

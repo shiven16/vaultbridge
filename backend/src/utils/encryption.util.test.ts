@@ -10,12 +10,12 @@ vi.mock('../config/env.js', () => ({
 describe('Encryption Utility Unit Tests', () => {
   it('should encrypt and decrypt a string successfully', () => {
     const originalText = 'Hello, VaultBridge!';
-    
+
     // Encrypt
     const encryptedText = encrypt(originalText);
     expect(encryptedText).not.toBe(originalText);
     expect(encryptedText.split(':').length).toBe(3); // format: iv:tag:encrypted
-    
+
     // Decrypt
     const decryptedText = decrypt(encryptedText);
     expect(decryptedText).toBe(originalText);

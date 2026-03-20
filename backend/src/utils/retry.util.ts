@@ -24,7 +24,8 @@ function isRetryableError(error: unknown): boolean {
 
   // Check for HTTP status code patterns
   if (typeof error === 'object' && error !== null) {
-    const statusCode = (error as Record<string, unknown>).code ?? (error as Record<string, unknown>).status;
+    const statusCode =
+      (error as Record<string, unknown>).code ?? (error as Record<string, unknown>).status;
     if (typeof statusCode === 'number') {
       // Retry on 429 (Too Many Requests) and 5xx errors
       if (statusCode === 429 || (statusCode >= 500 && statusCode < 600)) {
@@ -47,10 +48,7 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export async function withRetry<T>(
-  fn: () => Promise<T>,
-  options?: RetryOptions,
-): Promise<T> {
+export async function withRetry<T>(fn: () => Promise<T>, options?: RetryOptions): Promise<T> {
   const opts = { ...DEFAULT_OPTIONS, ...options };
   let lastError: unknown;
 
@@ -72,9 +70,12 @@ export async function withRetry<T>(
       }
 
       const delay = calculateDelay(attempt, opts.baseDelayMs, opts.maxDelayMs);
-      logger.info(`Retrying after ${Math.round(delay)}ms (attempt ${attempt + 1}/${opts.maxRetries})`, {
-        error: error instanceof Error ? error.message : String(error),
-      });
+      logger.info(
+        `Retrying after ${Math.round(delay)}ms (attempt ${attempt + 1}/${opts.maxRetries})`,
+        {
+          error: error instanceof Error ? error.message : String(error),
+        },
+      );
 
       await sleep(delay);
     }

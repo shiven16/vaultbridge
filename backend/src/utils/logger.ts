@@ -25,9 +25,10 @@ export const logger = winston.createLogger({
       format: winston.format.combine(
         winston.format.colorize(),
         winston.format.printf(({ timestamp, level, message, ...meta }) => {
-          const metaStr = Object.keys(meta).length > 1 // 1 because 'service' is default
-            ? ` ${JSON.stringify(meta)}`
-            : '';
+          const metaStr =
+            Object.keys(meta).length > 1 // 1 because 'service' is default
+              ? ` ${JSON.stringify(meta)}`
+              : '';
           return `${timestamp} [${level}]: ${message}${metaStr}`;
         }),
       ),

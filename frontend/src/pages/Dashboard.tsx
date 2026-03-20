@@ -1,10 +1,10 @@
-import { useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
-import { useTransfer } from '../hooks/useTransfer';
-import FileList from '../components/FileList';
-import TransferPanel from '../components/TransferPanel';
-import type { DriveFile } from '../api/drive.api';
+import { useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
+import { useTransfer } from "../hooks/useTransfer";
+import FileList from "../components/FileList";
+import TransferPanel from "../components/TransferPanel";
+import type { DriveFile } from "../api/drive.api";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -13,12 +13,9 @@ export default function Dashboard() {
     useTransfer();
   const [selectedFiles, setSelectedFiles] = useState<DriveFile[]>([]);
 
-  const handleRemoveFile = useCallback(
-    (fileId: string) => {
-      setSelectedFiles((prev) => prev.filter((f) => f.id !== fileId));
-    },
-    [],
-  );
+  const handleRemoveFile = useCallback((fileId: string) => {
+    setSelectedFiles((prev) => prev.filter((f) => f.id !== fileId));
+  }, []);
 
   const handleStartTransfer = useCallback(() => {
     if (!sourceAccount || !destinationAccount) return;
@@ -38,7 +35,7 @@ export default function Dashboard() {
 
   // Redirect if not connected (must be after all hooks)
   if (!isFullyConnected || !sourceAccount || !destinationAccount) {
-    navigate('/login');
+    navigate("/login");
     return null;
   }
 
@@ -51,7 +48,15 @@ export default function Dashboard() {
             {/* Source */}
             <div className="flex items-center gap-2.5">
               <div className="flex h-7 w-7 items-center justify-center rounded-full bg-success/10">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-success">
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  className="text-success"
+                >
                   <polyline points="15 3 21 3 21 9" />
                   <path d="M21 3l-7 7" />
                 </svg>
@@ -67,7 +72,15 @@ export default function Dashboard() {
             </div>
 
             {/* Arrow */}
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-surface-600">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              className="text-surface-600"
+            >
               <line x1="5" y1="12" x2="19" y2="12" />
               <polyline points="12 5 19 12 12 19" />
             </svg>
@@ -75,7 +88,15 @@ export default function Dashboard() {
             {/* Destination */}
             <div className="flex items-center gap-2.5">
               <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary-500/10">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-primary-400">
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  className="text-primary-400"
+                >
                   <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
                   <polyline points="7 10 12 15 17 10" />
                   <line x1="12" y1="15" x2="12" y2="3" />

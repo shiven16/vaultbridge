@@ -69,10 +69,7 @@ async function executeTransfer(
     logger.info(`Executing transfer ${transferId}: ${fileName}`);
 
     // Step 1: Download file as a stream from source account
-    const downloadStream = await driveService.downloadFileStream(
-      sourceAccessToken,
-      fileId,
-    );
+    const downloadStream = await driveService.downloadFileStream(sourceAccessToken, fileId);
 
     // Step 2: Pipe the stream directly to upload on destination account
     const uploadedFileId = await driveService.uploadFileStream(

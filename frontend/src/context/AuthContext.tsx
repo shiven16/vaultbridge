@@ -1,5 +1,5 @@
-import { createContext, useState, useCallback, type ReactNode } from 'react';
-import { setSessionToken } from '../utils/apiClient';
+import { createContext, useState, useCallback, type ReactNode } from "react";
+import { setSessionToken } from "../utils/apiClient";
 
 export interface AccountInfo {
   email: string;
@@ -25,8 +25,11 @@ export interface AuthContextType extends AuthState {
 export const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [sourceAccount, setSourceAccountState] = useState<AccountInfo | null>(null);
-  const [destinationAccount, setDestinationAccountState] = useState<AccountInfo | null>(null);
+  const [sourceAccount, setSourceAccountState] = useState<AccountInfo | null>(
+    null,
+  );
+  const [destinationAccount, setDestinationAccountState] =
+    useState<AccountInfo | null>(null);
   const [sessionToken, setSessionTokenState] = useState<string | null>(null);
 
   const setSource = useCallback((account: AccountInfo) => {
@@ -51,7 +54,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSessionTokenState(null);
   }, []);
 
-  const isFullyConnected = sourceAccount !== null && destinationAccount !== null;
+  const isFullyConnected =
+    sourceAccount !== null && destinationAccount !== null;
 
   return (
     <AuthContext.Provider

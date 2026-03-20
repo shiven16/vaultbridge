@@ -11,11 +11,7 @@ export function login(_req: Request, res: Response): void {
   res.redirect(authUrl);
 }
 
-export async function callback(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> {
+export async function callback(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const { code } = req.query;
 
@@ -50,9 +46,7 @@ export async function callback(
     // Upsert token record
     await prisma.token.upsert({
       where: {
-        id: (
-          await prisma.token.findFirst({ where: { userId: user.id } })
-        )?.id ?? '',
+        id: (await prisma.token.findFirst({ where: { userId: user.id } }))?.id ?? '',
       },
       update: {
         accessToken: tokens.accessToken,
@@ -68,11 +62,9 @@ export async function callback(
     });
 
     // Generate JWT session token
-    const sessionToken = jwt.sign(
-      { userId: user.id, email: user.email },
-      env.JWT_SECRET,
-      { expiresIn: '7d' },
-    );
+    const sessionToken = jwt.sign({ userId: user.id, email: user.email }, env.JWT_SECRET, {
+      expiresIn: '7d',
+    });
 
     logger.info(`User authenticated: ${user.email}`);
 

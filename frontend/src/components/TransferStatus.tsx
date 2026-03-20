@@ -1,26 +1,26 @@
-import type { TransferItem } from '../hooks/useTransfer';
+import type { TransferItem } from "../hooks/useTransfer";
 
 interface TransferStatusProps {
   transfers: TransferItem[];
 }
 
-function StatusBadge({ status }: { status: TransferItem['status'] }) {
+function StatusBadge({ status }: { status: TransferItem["status"] }) {
   const config = {
     pending: {
-      label: 'Pending',
-      className: 'bg-surface-700 text-surface-300',
+      label: "Pending",
+      className: "bg-surface-700 text-surface-300",
     },
     in_progress: {
-      label: 'Transferring',
-      className: 'bg-primary-500/20 text-primary-300',
+      label: "Transferring",
+      className: "bg-primary-500/20 text-primary-300",
     },
     success: {
-      label: 'Completed',
-      className: 'bg-success/20 text-success',
+      label: "Completed",
+      className: "bg-success/20 text-success",
     },
     failed: {
-      label: 'Failed',
-      className: 'bg-danger/20 text-danger',
+      label: "Failed",
+      className: "bg-danger/20 text-danger",
     },
   };
 
@@ -30,16 +30,34 @@ function StatusBadge({ status }: { status: TransferItem['status'] }) {
     <span
       className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${className}`}
     >
-      {status === 'in_progress' && (
+      {status === "in_progress" && (
         <span className="h-3 w-3 animate-spin rounded-full border-2 border-primary-300/20 border-t-primary-300" />
       )}
-      {status === 'success' && (
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+      {status === "success" && (
+        <svg
+          width="12"
+          height="12"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
           <polyline points="20 6 9 17 4 12" />
         </svg>
       )}
-      {status === 'failed' && (
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+      {status === "failed" && (
+        <svg
+          width="12"
+          height="12"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
           <line x1="18" y1="6" x2="6" y2="18" />
           <line x1="6" y1="6" x2="18" y2="18" />
         </svg>
@@ -52,8 +70,8 @@ function StatusBadge({ status }: { status: TransferItem['status'] }) {
 export default function TransferStatus({ transfers }: TransferStatusProps) {
   if (transfers.length === 0) return null;
 
-  const completed = transfers.filter((t) => t.status === 'success').length;
-  const failed = transfers.filter((t) => t.status === 'failed').length;
+  const completed = transfers.filter((t) => t.status === "success").length;
+  const failed = transfers.filter((t) => t.status === "failed").length;
   const total = transfers.length;
   const progress = ((completed + failed) / total) * 100;
 
@@ -80,9 +98,7 @@ export default function TransferStatus({ transfers }: TransferStatusProps) {
             {completed > 0 && (
               <span className="text-success">{completed} completed</span>
             )}
-            {failed > 0 && (
-              <span className="text-danger">{failed} failed</span>
-            )}
+            {failed > 0 && <span className="text-danger">{failed} failed</span>}
           </div>
         )}
       </div>

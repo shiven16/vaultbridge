@@ -1,11 +1,11 @@
-import { Link, useLocation } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
+import { Link, useLocation } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
 
 export default function Navbar() {
   const { sourceAccount, destinationAccount, clearAuth } = useAuth();
   const location = useLocation();
 
-  const isHome = location.pathname === '/';
+  const isHome = location.pathname === "/";
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/[0.06] bg-surface-950/80 backdrop-blur-xl">
@@ -42,7 +42,9 @@ export default function Navbar() {
           {destinationAccount && (
             <div className="hidden items-center gap-2 rounded-full bg-surface-800/50 px-3 py-1.5 text-xs sm:flex">
               <span className="h-2 w-2 rounded-full bg-primary-400" />
-              <span className="text-surface-300">{destinationAccount.email}</span>
+              <span className="text-surface-300">
+                {destinationAccount.email}
+              </span>
             </div>
           )}
           {!isHome && sourceAccount && (

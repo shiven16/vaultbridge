@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -16,8 +16,8 @@ export default function Home() {
         className="pointer-events-none absolute inset-0 opacity-[0.03]"
         style={{
           backgroundImage:
-            'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)',
-          backgroundSize: '60px 60px',
+            "linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)",
+          backgroundSize: "60px 60px",
         }}
       />
 
@@ -30,7 +30,7 @@ export default function Home() {
 
         {/* Heading */}
         <h1 className="text-4xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl md:text-6xl">
-          Transfer files between{' '}
+          Transfer files between{" "}
           <span className="bg-gradient-to-r from-primary-400 to-primary-300 bg-clip-text text-transparent">
             Google accounts
           </span>
@@ -45,7 +45,7 @@ export default function Home() {
         {/* CTA */}
         <button
           id="get-started-btn"
-          onClick={() => navigate('/login')}
+          onClick={() => navigate("/login")}
           className="group mt-10 cursor-pointer rounded-2xl border-none bg-gradient-to-r from-primary-600 to-primary-500 px-8 py-4 text-base font-semibold text-white shadow-2xl shadow-primary-500/25 transition-all duration-300 hover:shadow-primary-500/40 hover:brightness-110"
         >
           <span className="flex items-center gap-2">
@@ -71,19 +71,19 @@ export default function Home() {
         <div className="mt-20 grid w-full grid-cols-1 gap-4 sm:grid-cols-3">
           {[
             {
-              icon: '🔒',
-              title: 'Secure',
-              desc: 'Tokens stored in memory, never in localStorage',
+              icon: "🔒",
+              title: "Secure",
+              desc: "Tokens stored in memory, never in localStorage",
             },
             {
-              icon: '⚡',
-              title: 'Streaming',
-              desc: 'Files stream directly between accounts',
+              icon: "⚡",
+              title: "Streaming",
+              desc: "Files stream directly between accounts",
             },
             {
-              icon: '🔄',
-              title: 'Reliable',
-              desc: 'Auto-retry with cron job for failed transfers',
+              icon: "🔄",
+              title: "Reliable",
+              desc: "Auto-retry with cron job for failed transfers",
             },
           ].map((f) => (
             <div
@@ -91,9 +91,7 @@ export default function Home() {
               className="rounded-2xl border border-white/[0.06] bg-surface-900/50 p-5 text-center backdrop-blur-sm transition-colors hover:border-white/[0.1]"
             >
               <span className="text-2xl">{f.icon}</span>
-              <p className="mt-2 text-sm font-semibold text-white">
-                {f.title}
-              </p>
+              <p className="mt-2 text-sm font-semibold text-white">{f.title}</p>
               <p className="mt-1 text-xs leading-relaxed text-surface-500">
                 {f.desc}
               </p>

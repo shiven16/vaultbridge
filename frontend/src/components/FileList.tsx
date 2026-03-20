@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
-import { listFiles, type DriveFile } from '../api/drive.api';
-import FileItem from './FileItem';
+import { useState, useEffect, useCallback } from "react";
+import { listFiles, type DriveFile } from "../api/drive.api";
+import FileItem from "./FileItem";
 
 interface FileListProps {
   accessToken: string;
@@ -38,9 +38,7 @@ export default function FileList({
         }
         setNextPageToken(result.nextPageToken);
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : 'Failed to load files',
-        );
+        setError(err instanceof Error ? err.message : "Failed to load files");
       } finally {
         setLoading(false);
         setLoadingMore(false);
@@ -86,7 +84,15 @@ export default function FileList({
     return (
       <div className="flex flex-col items-center justify-center py-20">
         <div className="flex h-12 w-12 items-center justify-center rounded-full bg-danger/10">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-danger">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            className="text-danger"
+          >
             <circle cx="12" cy="12" r="10" />
             <line x1="15" y1="9" x2="9" y2="15" />
             <line x1="9" y1="9" x2="15" y2="15" />
@@ -119,7 +125,7 @@ export default function FileList({
       {/* Header */}
       <div className="flex items-center justify-between border-b border-white/[0.06] px-5 py-3">
         <p className="text-sm font-medium text-surface-300">
-          {files.length} files{' '}
+          {files.length} files{" "}
           <span className="text-surface-500">
             · {selectedFiles.length} selected
           </span>
@@ -164,7 +170,7 @@ export default function FileList({
                 Loading…
               </span>
             ) : (
-              'Load More Files'
+              "Load More Files"
             )}
           </button>
         )}

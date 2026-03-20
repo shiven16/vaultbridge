@@ -1,9 +1,9 @@
-import axios from 'axios';
+import axios from "axios";
 
 const apiClient = axios.create({
-  baseURL: '/api',
+  baseURL: "/api",
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
   withCredentials: true,
 });
@@ -31,7 +31,7 @@ apiClient.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       sessionToken = null;
-      window.location.href = '/login';
+      window.location.href = "/login";
     }
     return Promise.reject(error);
   },
