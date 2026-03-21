@@ -37,6 +37,13 @@ jobs:
       - name: Run tests
         working-directory: backend
         run: npm run test
+        env:
+          GOOGLE_CLIENT_ID: "test-client-id"
+          GOOGLE_CLIENT_SECRET: "test-client-secret"
+          GOOGLE_REDIRECT_URI: "http://localhost:3000/auth/callback"
+          DATABASE_URL: "postgresql://test:test@localhost:5432/test"
+          JWT_SECRET: "dummy_jwt_secret_that_is_32_chars_long!"
+          ENCRYPTION_KEY: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
 
   frontend:
     name: Frontend CI
