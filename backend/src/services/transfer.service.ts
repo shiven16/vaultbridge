@@ -14,47 +14,99 @@ export interface TransferInput {
   mimeType?: string;
 }
 
-export async function initiateTransfer(input: TransferInput): Promise<string> {
-  // Check concurrency limit
+export interface BatchTransferInput {
+  userId: string;
+  sourceAccessToken: string;
+  destinationAccessToken: string;
+  files: Array<{
+    fileId: string;
+    fileName: string;
+    mimeType?: string;
+  }>;
+}
+
+export async function processQueue(userId: string, sourceAccessToken: string, destinationAccessToken: string) {
   const activeTransfers = await prisma.transfer.count({
     where: {
-      userId: input.userId,
+      userId,
       status: 'in_progress',
     },
   });
 
-  if (activeTransfers >= MAX_CONCURRENT_TRANSFERS) {
-    throw new Error(
-      `Maximum concurrent transfers (${MAX_CONCURRENT_TRANSFERS}) reached. Please wait for current transfers to complete.`,
-    );
-  }
+  const availableSlots = MAX_CONCURRENT_TRANSFERS - activeTransfers;
+  if (availableSlots <= 0) return;
 
-  // Create transfer record
+  const pendingTransfers = await prisma.transfer.findMany({
+    where: { userId, status: 'pending' },
+    orderBy: { createdAt: 'asc' },
+    take: availableSlots,
+  });
+
+  if (pendingTransfers.length === 0) return;
+
+  await prisma.transfer.updateMany({
+    where: { id: { in: pendingTransfers.map(t => t.id) } },
+    data: { status: 'in_progress', startedAt: new Date() },
+  });
+
+  for (const transfer of pendingTransfers) {
+    executeTransfer(
+      transfer.id,
+      sourceAccessToken,
+      destinationAccessToken,
+      transfer.sourceFileId,
+      transfer.fileName,
+      'application/octet-stream',
+    )
+      .catch((error) => {
+        logger.error(`Queue Background error for ${transfer.id}:`, error);
+      })
+      .finally(() => {
+        // As soon as this finishes, trigger queue processing for the next file
+        processQueue(userId, sourceAccessToken, destinationAccessToken).catch(err => {
+          logger.error(`Failed to process next queue item: ${err}`);
+        });
+      });
+  }
+}
+
+export async function initiateTransfer(input: TransferInput): Promise<string> {
   const transfer = await prisma.transfer.create({
     data: {
       userId: input.userId,
       sourceFileId: input.fileId,
       fileName: input.fileName,
-      status: 'in_progress',
-      startedAt: new Date(),
+      status: 'pending',
     },
   });
 
-  // Execute transfer in the background (fire-and-forget)
-  executeTransfer(
-    transfer.id,
-    input.sourceAccessToken,
-    input.destinationAccessToken,
-    input.fileId,
-    input.fileName,
-    input.mimeType ?? 'application/octet-stream',
-  ).catch((error) => {
-    logger.error(`Background transfer failed for ${transfer.id}:`, {
-      error: error instanceof Error ? error.message : String(error),
-    });
+  processQueue(input.userId, input.sourceAccessToken, input.destinationAccessToken).catch((error) => {
+    logger.error(`Initial queue processing failed: ${error}`);
   });
 
   return transfer.id;
+}
+
+export async function initiateBatchTransfer(input: BatchTransferInput): Promise<string[]> {
+  const createdTransferIds: string[] = [];
+
+  for (const file of input.files) {
+    const transfer = await prisma.transfer.create({
+      data: {
+        userId: input.userId,
+        sourceFileId: file.fileId,
+        fileName: file.fileName,
+        status: 'pending',
+      },
+    });
+    createdTransferIds.push(transfer.id);
+  }
+
+  processQueue(input.userId, input.sourceAccessToken, input.destinationAccessToken).catch((error) => {
+    logger.error(`Initial batch queue processing failed: ${error}`);
+  });
+
+  return createdTransferIds;
 }
 
 async function executeTransfer(

@@ -12,6 +12,16 @@ const createTransferSchema = z.object({
   mimeType: z.string().optional(),
 });
 
+const createBatchTransferSchema = z.object({
+  sourceAccessToken: z.string().min(1, 'sourceAccessToken is required'),
+  destinationAccessToken: z.string().min(1, 'destinationAccessToken is required'),
+  files: z.array(z.object({
+    fileId: z.string().min(1, 'fileId is required'),
+    fileName: z.string().min(1, 'fileName is required'),
+    mimeType: z.string().optional(),
+  })).min(1, 'At least one file is required'),
+});
+
 export async function createTransfer(
   req: AuthRequest,
   res: Response,
@@ -36,6 +46,34 @@ export async function createTransfer(
     res.status(202).json({
       message: 'Transfer initiated',
       transferId,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function createBatchTransfer(
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    if (!req.userId) {
+      throw new AppError('Unauthorized', 401);
+    }
+
+    const body = createBatchTransferSchema.parse(req.body);
+
+    const transferIds = await transferService.initiateBatchTransfer({
+      userId: req.userId,
+      sourceAccessToken: body.sourceAccessToken,
+      destinationAccessToken: body.destinationAccessToken,
+      files: body.files,
+    });
+
+    res.status(202).json({
+      message: 'Batch transfers initiated in the queue',
+      transferIds,
     });
   } catch (error) {
     next(error);
