@@ -1,6 +1,7 @@
 import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
 import authRoutes from './routes/auth.routes.js';
 import driveRoutes from './routes/drive.routes.js';
@@ -11,7 +12,8 @@ const app = express();
 
 // Security
 app.use(helmet());
-app.use(cors());
+app.use(cors({ origin: true, credentials: true })); // Important for cookies!
+app.use(cookieParser());
 
 // Rate limiting
 const limiter = rateLimit({

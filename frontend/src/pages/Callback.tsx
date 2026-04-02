@@ -6,14 +6,13 @@ import { handleCallback as apiHandleCallback } from "../api/auth.api";
 export default function Callback() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { sourceAccount, setSourceAccount, setDestinationAccount } = useAuth();
+  const { sourceAccount, refreshAuth } = useAuth();
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const processCallback = async () => {
       const code = searchParams.get("code");
-      const type =
-        searchParams.get("type") || (sourceAccount ? "destination" : "source");
+      const type = searchParams.get("type") || (sourceAccount ? "destination" : "source");
 
       if (!code) {
         setError("Missing authorization code");
@@ -21,21 +20,9 @@ export default function Callback() {
       }
 
       try {
-        const result = await apiHandleCallback(code);
-
-        const accountInfo = {
-          email: result.user.email,
-          name: result.user.name,
-          token: result.token,
-        };
-
-        if (type === "source") {
-          setSourceAccount(accountInfo);
-        } else {
-          setDestinationAccount(accountInfo);
-        }
-
-        navigate("/login");
+        await apiHandleCallback(code, type);
+        await refreshAuth();
+        navigate("/"); // or "/dashboard" depending on your UX!
       } catch (err) {
         setError(err instanceof Error ? err.message : "Authentication failed");
       }
@@ -46,8 +33,7 @@ export default function Callback() {
     searchParams,
     navigate,
     sourceAccount,
-    setSourceAccount,
-    setDestinationAccount,
+    refreshAuth,
   ]);
 
   if (error) {

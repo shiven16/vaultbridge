@@ -7,17 +7,18 @@ export function getLoginUrl(type: "source" | "destination"): string {
 }
 
 export interface CallbackResponse {
-  token: string;
+  message: string;
   user: {
     id: string;
     email: string;
     name: string;
+    type: string;
   };
 }
 
-export async function handleCallback(code: string): Promise<CallbackResponse> {
+export async function handleCallback(code: string, type: string): Promise<CallbackResponse> {
   const response = await apiClient.get<CallbackResponse>("/auth/callback", {
-    params: { code },
+    params: { code, type },
   });
   return response.data;
 }

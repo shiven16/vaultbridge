@@ -1,23 +1,20 @@
-import { createContext, useState, useCallback, type ReactNode } from "react";
-import { setSessionToken } from "../utils/apiClient";
+import { createContext, useState, useCallback, useEffect, type ReactNode } from "react";
+import apiClient from "../utils/apiClient";
 
 export interface AccountInfo {
   email: string;
   name: string;
-  token: string;
 }
 
 export interface AuthState {
   sourceAccount: AccountInfo | null;
   destinationAccount: AccountInfo | null;
-  sessionToken: string | null;
+  isLoading: boolean;
 }
 
 export interface AuthContextType extends AuthState {
-  setSourceAccount: (account: AccountInfo) => void;
-  setDestinationAccount: (account: AccountInfo) => void;
-  setSession: (token: string) => void;
-  clearAuth: () => void;
+  refreshAuth: () => Promise<void>;
+  logout: () => void;
   isFullyConnected: boolean;
 }
 
@@ -25,48 +22,55 @@ export interface AuthContextType extends AuthState {
 export const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [sourceAccount, setSourceAccountState] = useState<AccountInfo | null>(
-    null,
-  );
-  const [destinationAccount, setDestinationAccountState] =
-    useState<AccountInfo | null>(null);
-  const [sessionToken, setSessionTokenState] = useState<string | null>(null);
+  const [sourceAccount, setSourceAccountState] = useState<AccountInfo | null>(null);
+  const [destinationAccount, setDestinationAccountState] = useState<AccountInfo | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const setSource = useCallback((account: AccountInfo) => {
-    setSourceAccountState(account);
-    setSessionToken(account.token);
-    setSessionTokenState(account.token);
+  const refreshAuth = useCallback(async () => {
+    try {
+      const { data } = await apiClient.get('/auth/me');
+      
+      if (data.sourceConnected) {
+        setSourceAccountState({ email: data.sourceEmail, name: data.user.name });
+      } else {
+        setSourceAccountState(null);
+      }
+      
+      if (data.destConnected) {
+        setDestinationAccountState({ email: data.destEmail, name: '' });
+      } else {
+        setDestinationAccountState(null);
+      }
+    } catch {
+      setSourceAccountState(null);
+      setDestinationAccountState(null);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
-  const setDestination = useCallback((account: AccountInfo) => {
-    setDestinationAccountState(account);
-  }, []);
+  useEffect(() => {
+    refreshAuth();
+  }, [refreshAuth]);
 
-  const setSession = useCallback((token: string) => {
-    setSessionToken(token);
-    setSessionTokenState(token);
-  }, []);
-
-  const clearAuth = useCallback(() => {
+  const logout = useCallback(() => {
     setSourceAccountState(null);
     setDestinationAccountState(null);
-    setSessionToken(null);
-    setSessionTokenState(null);
+    // Ideally this hits a backend /auth/logout to destroy the cookie, 
+    // or just clears state until a 401 kicks in.
+    window.location.href = '/login';
   }, []);
 
-  const isFullyConnected =
-    sourceAccount !== null && destinationAccount !== null;
+  const isFullyConnected = sourceAccount !== null && destinationAccount !== null;
 
   return (
     <AuthContext.Provider
       value={{
         sourceAccount,
         destinationAccount,
-        sessionToken,
-        setSourceAccount: setSource,
-        setDestinationAccount: setDestination,
-        setSession,
-        clearAuth,
+        isLoading,
+        refreshAuth,
+        logout,
         isFullyConnected,
       }}
     >

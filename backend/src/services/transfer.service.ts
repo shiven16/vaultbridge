@@ -1,5 +1,6 @@
 import { prisma } from '../database/prisma.js';
 import * as driveService from './drive.service.js';
+import * as googleService from './google.service.js';
 import { logger } from '../utils/logger.js';
 
 const MAX_CONCURRENT_TRANSFERS = 3;
@@ -7,8 +8,6 @@ const MAX_RETRY_COUNT = 5;
 
 export interface TransferInput {
   userId: string;
-  sourceAccessToken: string;
-  destinationAccessToken: string;
   fileId: string;
   fileName: string;
   mimeType?: string;
@@ -16,8 +15,6 @@ export interface TransferInput {
 
 export interface BatchTransferInput {
   userId: string;
-  sourceAccessToken: string;
-  destinationAccessToken: string;
   files: Array<{
     fileId: string;
     fileName: string;
@@ -25,7 +22,7 @@ export interface BatchTransferInput {
   }>;
 }
 
-export async function processQueue(userId: string, sourceAccessToken: string, destinationAccessToken: string) {
+export async function processQueue(userId: string) {
   const activeTransfers = await prisma.transfer.count({
     where: {
       userId,
@@ -50,22 +47,29 @@ export async function processQueue(userId: string, sourceAccessToken: string, de
   });
 
   for (const transfer of pendingTransfers) {
-    executeTransfer(
-      transfer.id,
-      sourceAccessToken,
-      destinationAccessToken,
-      transfer.sourceFileId,
-      transfer.fileName,
-      'application/octet-stream',
-    )
+    Promise.resolve()
+      .then(async () => {
+        const sourceToken = await googleService.getValidTokenForUser(userId, 'source');
+        const destToken = await googleService.getValidTokenForUser(userId, 'destination');
+        await executeTransfer(
+          transfer.id,
+          sourceToken,
+          destToken,
+          transfer.sourceFileId,
+          transfer.fileName,
+          'application/octet-stream',
+        );
+      })
       .catch((error) => {
         logger.error(`Queue Background error for ${transfer.id}:`, error);
+        // Ensure failed transfers are marked failed immediately even if Google throws before executeTransfer
+        prisma.transfer.update({
+          where: { id: transfer.id },
+          data: { status: 'failed', error: String(error), finishedAt: new Date() },
+        }).catch(() => {});
       })
       .finally(() => {
-        // As soon as this finishes, trigger queue processing for the next file
-        processQueue(userId, sourceAccessToken, destinationAccessToken).catch(err => {
-          logger.error(`Failed to process next queue item: ${err}`);
-        });
+        processQueue(userId).catch((err) => logger.error(`Failed to trigger next: ${err}`));
       });
   }
 }
@@ -80,7 +84,7 @@ export async function initiateTransfer(input: TransferInput): Promise<string> {
     },
   });
 
-  processQueue(input.userId, input.sourceAccessToken, input.destinationAccessToken).catch((error) => {
+  processQueue(input.userId).catch((error) => {
     logger.error(`Initial queue processing failed: ${error}`);
   });
 
@@ -102,7 +106,7 @@ export async function initiateBatchTransfer(input: BatchTransferInput): Promise<
     createdTransferIds.push(transfer.id);
   }
 
-  processQueue(input.userId, input.sourceAccessToken, input.destinationAccessToken).catch((error) => {
+  processQueue(input.userId).catch((error) => {
     logger.error(`Initial batch queue processing failed: ${error}`);
   });
 
@@ -163,11 +167,7 @@ export async function retryFailedTransfers(): Promise<void> {
       retryCount: { lt: MAX_RETRY_COUNT },
     },
     include: {
-      user: {
-        include: {
-          tokens: true,
-        },
-      },
+      user: true,
     },
     take: 10,
     orderBy: { createdAt: 'asc' },
@@ -180,38 +180,18 @@ export async function retryFailedTransfers(): Promise<void> {
   logger.info(`Found ${failedTransfers.length} failed transfers to retry`);
 
   for (const transfer of failedTransfers) {
-    // Need at least 2 tokens (source + destination accounts)
-    if (transfer.user.tokens.length < 2) {
-      logger.warn(`User ${transfer.userId} has insufficient tokens for retry`);
-      continue;
-    }
-
     // Increment retry count
     await prisma.transfer.update({
       where: { id: transfer.id },
       data: {
         retryCount: { increment: 1 },
-        status: 'in_progress',
+        status: 'pending',
         error: null,
-        startedAt: new Date(),
-        finishedAt: null,
       },
     });
 
-    // Use the first two tokens as source and destination
-    const [sourceToken, destToken] = transfer.user.tokens;
-
-    executeTransfer(
-      transfer.id,
-      sourceToken.accessToken,
-      destToken.accessToken,
-      transfer.sourceFileId,
-      transfer.fileName,
-      'application/octet-stream',
-    ).catch((error) => {
-      logger.error(`Retry transfer failed for ${transfer.id}:`, {
-        error: error instanceof Error ? error.message : String(error),
-      });
+    processQueue(transfer.userId).catch((error) => {
+      logger.error(`Retry queue trigger failed for ${transfer.id}:`, error);
     });
 
     // Add delay between retries to avoid rate limiting

@@ -19,14 +19,12 @@ export async function authMiddleware(
   next: NextFunction,
 ): Promise<void> {
   try {
-    const authHeader = req.headers.authorization;
+    const token = req.cookies.token;
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      res.status(401).json({ error: 'Missing or invalid authorization header' });
+    if (!token) {
+      res.status(401).json({ error: 'Missing or invalid cookie token' });
       return;
     }
-
-    const token = authHeader.split(' ')[1];
 
     const decoded = jwt.verify(token, env.JWT_SECRET) as JwtPayload;
 

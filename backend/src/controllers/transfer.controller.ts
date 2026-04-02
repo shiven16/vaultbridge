@@ -5,16 +5,12 @@ import * as transferService from '../services/transfer.service.js';
 import { AppError } from '../middlewares/error.middleware.js';
 
 const createTransferSchema = z.object({
-  sourceAccessToken: z.string().min(1, 'sourceAccessToken is required'),
-  destinationAccessToken: z.string().min(1, 'destinationAccessToken is required'),
   fileId: z.string().min(1, 'fileId is required'),
   fileName: z.string().min(1, 'fileName is required'),
   mimeType: z.string().optional(),
 });
 
 const createBatchTransferSchema = z.object({
-  sourceAccessToken: z.string().min(1, 'sourceAccessToken is required'),
-  destinationAccessToken: z.string().min(1, 'destinationAccessToken is required'),
   files: z.array(z.object({
     fileId: z.string().min(1, 'fileId is required'),
     fileName: z.string().min(1, 'fileName is required'),
@@ -36,8 +32,6 @@ export async function createTransfer(
 
     const transferId = await transferService.initiateTransfer({
       userId: req.userId,
-      sourceAccessToken: body.sourceAccessToken,
-      destinationAccessToken: body.destinationAccessToken,
       fileId: body.fileId,
       fileName: body.fileName,
       mimeType: body.mimeType,
@@ -66,8 +60,6 @@ export async function createBatchTransfer(
 
     const transferIds = await transferService.initiateBatchTransfer({
       userId: req.userId,
-      sourceAccessToken: body.sourceAccessToken,
-      destinationAccessToken: body.destinationAccessToken,
       files: body.files,
     });
 

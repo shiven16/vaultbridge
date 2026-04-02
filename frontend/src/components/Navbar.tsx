@@ -2,7 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
 export default function Navbar() {
-  const { sourceAccount, destinationAccount, clearAuth } = useAuth();
+  const { sourceAccount, destinationAccount, logout } = useAuth();
   const location = useLocation();
 
   const isHome = location.pathname === "/";
@@ -49,7 +49,7 @@ export default function Navbar() {
           )}
           {!isHome && sourceAccount && (
             <button
-              onClick={clearAuth}
+              onClick={logout}
               className="cursor-pointer rounded-lg border border-white/10 bg-transparent px-3 py-1.5 text-xs font-medium text-surface-400 transition-all duration-200 hover:border-danger/40 hover:text-danger"
             >
               Disconnect

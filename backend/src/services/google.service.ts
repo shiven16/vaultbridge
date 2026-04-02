@@ -1,6 +1,8 @@
 import { createOAuth2Client, GOOGLE_SCOPES } from '../config/google.config.js';
 import { google } from 'googleapis';
 import { logger } from '../utils/logger.js';
+import { prisma } from '../database/prisma.js';
+import { decrypt } from '../utils/encryption.util.js';
 
 export function getAuthUrl(state?: string): string {
   const oauth2Client = createOAuth2Client();
@@ -77,4 +79,36 @@ export async function refreshAccessToken(refreshToken: string): Promise<{
     accessToken: credentials.access_token,
     expiryDate: credentials.expiry_date ?? Date.now() + 3600 * 1000,
   };
+}
+
+export async function getValidTokenForUser(userId: string, type: 'source' | 'destination'): Promise<string> {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) throw new Error('User not found');
+
+  const token = type === 'source' ? user.sourceAccessToken : user.destAccessToken;
+  const refreshTokenEnc = type === 'source' ? user.sourceRefreshToken : user.destRefreshToken;
+  const expiry = type === 'source' ? user.sourceExpiryDate : user.destExpiryDate;
+
+  if (!token || !refreshTokenEnc || !expiry) {
+    throw new Error(`${type} account not connected`);
+  }
+
+  // Refresh if less than 5 minutes left
+  if (expiry.getTime() - Date.now() < 5 * 60 * 1000) {
+    const plainRefresh = decrypt(refreshTokenEnc);
+    const newCreds = await refreshAccessToken(plainRefresh);
+
+    const updateData = type === 'source' ? {
+      sourceAccessToken: newCreds.accessToken,
+      sourceExpiryDate: new Date(newCreds.expiryDate),
+    } : {
+      destAccessToken: newCreds.accessToken,
+      destExpiryDate: new Date(newCreds.expiryDate),
+    };
+
+    await prisma.user.update({ where: { id: userId }, data: updateData });
+    return newCreds.accessToken;
+  }
+
+  return token;
 }
