@@ -3,6 +3,7 @@ import { google } from 'googleapis';
 import { logger } from '../utils/logger.js';
 import { prisma } from '../database/prisma.js';
 import { decrypt } from '../utils/encryption.util.js';
+import { AppError } from '../middlewares/error.middleware.js';
 
 export function getAuthUrl(state?: string): string {
   const oauth2Client = createOAuth2Client();
@@ -83,14 +84,14 @@ export async function refreshAccessToken(refreshToken: string): Promise<{
 
 export async function getValidTokenForUser(userId: string, type: 'source' | 'destination'): Promise<string> {
   const user = await prisma.user.findUnique({ where: { id: userId } });
-  if (!user) throw new Error('User not found');
+  if (!user) throw new AppError('User not found', 404);
 
   const token = type === 'source' ? user.sourceAccessToken : user.destAccessToken;
   const refreshTokenEnc = type === 'source' ? user.sourceRefreshToken : user.destRefreshToken;
   const expiry = type === 'source' ? user.sourceExpiryDate : user.destExpiryDate;
 
   if (!token || !refreshTokenEnc || !expiry) {
-    throw new Error(`${type} account not connected`);
+    throw new AppError(`${type} account not connected`, 400);
   }
 
   // Refresh if less than 5 minutes left

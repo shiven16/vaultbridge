@@ -17,7 +17,8 @@ export function login(req: Request, res: Response): void {
 
 export async function callback(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { code, type = 'source' } = req.query;
+    const code = req.query.code as string;
+    const type = (req.query.type || req.query.state || 'source') as string;
 
     if (!code || typeof code !== 'string') {
       res.status(400).json({ error: 'Missing authorization code' });

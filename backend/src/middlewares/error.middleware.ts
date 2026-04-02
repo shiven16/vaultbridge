@@ -48,5 +48,7 @@ export function errorMiddleware(
 
   res.status(500).json({
     error: 'Internal server error',
+    details: err.message,
+    stack: process.env.NODE_ENV !== 'production' ? err.stack : undefined,
   });
 }
