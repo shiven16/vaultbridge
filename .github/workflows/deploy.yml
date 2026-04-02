@@ -74,15 +74,18 @@ jobs:
             # ──────────────────────────
             echo "Setting up backend..."
             cd "$APP_DIR/backend"
-            npm install --production
-            npx prisma generate
-
-            # Restart backend with PM2
-            if pm2 describe vaultbridge-backend > /dev/null 2>&1; then
-              pm2 restart vaultbridge-backend
-            else
-              pm2 start npm --name vaultbridge-backend -- run start
+            
+            # Build the docker image
+            docker build -t vaultbridge-backend .
+            
+            # Stop existing container if it exists
+            if docker ps -a --format '{{.Names}}' | grep -q "^vaultbridge-backend$"; then
+              docker stop vaultbridge-backend
+              docker rm vaultbridge-backend
             fi
+            
+            # Run the new container, using host network so it can connect to local DB
+            docker run -d --name vaultbridge-backend --network="host" --env-file .env vaultbridge-backend
 
             # ──────────────────────────
             # Frontend
