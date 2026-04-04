@@ -26,11 +26,7 @@ export default function Dashboard() {
       mimeType: f.mimeType,
     }));
 
-    startTransfers(
-      filesToTransfer,
-      sourceAccount.token,
-      destinationAccount.token,
-    );
+    startTransfers(filesToTransfer);
   }, [selectedFiles, sourceAccount, destinationAccount, startTransfers]);
 
   // Redirect if not connected (must be after all hooks)
@@ -137,7 +133,7 @@ export default function Dashboard() {
             </h2>
           </div>
           <FileList
-            accessToken={sourceAccount.token}
+            type="source"
             selectedFiles={selectedFiles}
             onSelectionChange={setSelectedFiles}
           />

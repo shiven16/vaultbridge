@@ -28,9 +28,7 @@ export function useTransfer() {
 
   const startTransfers = useCallback(
     async (
-      files: { fileId: string; fileName: string; mimeType: string }[],
-      sourceAccessToken: string,
-      destinationAccessToken: string,
+      files: { fileId: string; fileName: string; mimeType: string }[]
     ) => {
       setIsTransferring(true);
 
@@ -48,8 +46,6 @@ export function useTransfer() {
 
         try {
           const req: TransferRequest = {
-            sourceAccessToken,
-            destinationAccessToken,
             fileId: file.fileId,
             fileName: file.fileName,
             mimeType: file.mimeType,

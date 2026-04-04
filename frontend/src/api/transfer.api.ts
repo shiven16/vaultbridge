@@ -1,8 +1,6 @@
 import apiClient from "../utils/apiClient";
 
 export interface TransferRequest {
-  sourceAccessToken: string;
-  destinationAccessToken: string;
   fileId: string;
   fileName: string;
   mimeType?: string;

@@ -13,12 +13,12 @@ export interface DriveFileListResponse {
 }
 
 export async function listFiles(
-  accessToken: string,
+  type: "source" | "destination" = "source",
   pageToken?: string,
   pageSize = 20,
 ): Promise<DriveFileListResponse> {
   const response = await apiClient.get<DriveFileListResponse>("/drive/files", {
-    params: { accessToken, pageToken, pageSize },
+    params: { type, pageToken, pageSize },
   });
   return response.data;
 }

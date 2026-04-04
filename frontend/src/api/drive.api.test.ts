@@ -24,11 +24,11 @@ describe("Drive API Integration", () => {
     // @ts-expect-error - mockResolvedValue is safe here
     apiClient.get.mockResolvedValueOnce({ data: mockData });
 
-    const result = await listFiles("fake-access-token");
+    const result = await listFiles("source");
 
     expect(apiClient.get).toHaveBeenCalledWith("/drive/files", {
       params: {
-        accessToken: "fake-access-token",
+        type: "source",
         pageToken: undefined,
         pageSize: 20,
       },

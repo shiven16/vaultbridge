@@ -3,13 +3,13 @@ import { listFiles, type DriveFile } from "../api/drive.api";
 import FileItem from "./FileItem";
 
 interface FileListProps {
-  accessToken: string;
+  type: "source" | "destination";
   selectedFiles: DriveFile[];
   onSelectionChange: (files: DriveFile[]) => void;
 }
 
 export default function FileList({
-  accessToken,
+  type,
   selectedFiles,
   onSelectionChange,
 }: FileListProps) {
@@ -30,7 +30,7 @@ export default function FileList({
       setError(null);
 
       try {
-        const result = await listFiles(accessToken, pageToken);
+        const result = await listFiles(type, pageToken);
         if (isLoadingMore) {
           setFiles((prev) => [...prev, ...result.files]);
         } else {
@@ -44,7 +44,7 @@ export default function FileList({
         setLoadingMore(false);
       }
     },
-    [accessToken],
+    [type],
   );
 
   useEffect(() => {
