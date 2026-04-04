@@ -12,6 +12,7 @@ const envSchema = z.object({
   ENCRYPTION_KEY: z.string().length(64, 'ENCRYPTION_KEY must be a 64-character hex string'),
   PORT: z.string().default('3000').transform(Number),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+  FRONTEND_URL: z.string().url('FRONTEND_URL must be a valid URL').optional(),
 });
 
 const parsed = envSchema.safeParse(process.env);

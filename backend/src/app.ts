@@ -8,11 +8,16 @@ import driveRoutes from './routes/drive.routes.js';
 import transferRoutes from './routes/transfer.routes.js';
 import { errorMiddleware } from './middlewares/error.middleware.js';
 
+import { env } from './config/env.js';
+
 const app = express();
 
 // Security
 app.use(helmet());
-app.use(cors({ origin: true, credentials: true })); // Important for cookies!
+app.use(cors({ 
+  origin: env.FRONTEND_URL || true, 
+  credentials: true 
+})); // Restricts CORS if FRONTEND_URL is provided, else reflects origin
 app.use(cookieParser());
 
 // Rate limiting
