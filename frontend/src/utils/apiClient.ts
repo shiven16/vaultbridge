@@ -13,7 +13,10 @@ const apiClient = axios.create({
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const originalRequest = error.config;
+    // Don't auto-redirect if the 401 came from the /auth/me check itself,
+    // otherwise it causes an infinite reload loop!
+    if (error.response?.status === 401 && originalRequest.url !== '/auth/me') {
       window.location.href = "/login";
     }
     return Promise.reject(error);
