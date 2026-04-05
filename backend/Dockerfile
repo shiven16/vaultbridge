@@ -3,6 +3,9 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Install openssl for Prisma query engine
+RUN apk add --no-cache openssl
+
 # Install dependencies and prisma CLI
 COPY package*.json ./
 COPY prisma ./prisma/
@@ -21,6 +24,9 @@ RUN npm run build
 FROM node:20-alpine AS runner
 
 WORKDIR /app
+
+# Install openssl for Prisma engine in production
+RUN apk add --no-cache openssl
 
 # Set environment to production
 ENV NODE_ENV=production
