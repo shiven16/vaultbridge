@@ -1,10 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-import { getLoginUrl } from "../api/auth.api";
+import { getLoginUrl, disconnectAccount } from "../api/auth.api";
 
 export default function Login() {
   const navigate = useNavigate();
-  const { sourceAccount, destinationAccount, isFullyConnected } = useAuth();
+  const { sourceAccount, destinationAccount, isFullyConnected, refreshAuth } = useAuth();
 
   const handleConnectSource = () => {
     window.location.href = getLoginUrl("source");
@@ -12,6 +12,19 @@ export default function Login() {
 
   const handleConnectDestination = () => {
     window.location.href = getLoginUrl("destination");
+  };
+
+  const handleDisconnect = async (type: "source" | "destination") => {
+    try {
+      await disconnectAccount(type);
+      if (type === "source") {
+        window.location.href = "/login";
+      } else {
+        await refreshAuth();
+      }
+    } catch (e) {
+      console.error("Failed to disconnect", e);
+    }
   };
 
   return (
@@ -104,6 +117,14 @@ export default function Login() {
                     </svg>
                     Connect Source Account
                   </span>
+                </button>
+              )}
+              {sourceAccount && (
+                <button
+                  onClick={() => handleDisconnect("source")}
+                  className="mt-4 text-xs font-medium text-danger hover:underline cursor-pointer"
+                >
+                  Disconnect Source Account
                 </button>
               )}
             </div>
@@ -199,6 +220,14 @@ export default function Login() {
                     </svg>
                     Connect Destination Account
                   </span>
+                </button>
+              )}
+              {destinationAccount && (
+                <button
+                  onClick={() => handleDisconnect("destination")}
+                  className="mt-4 text-xs font-medium text-danger hover:underline cursor-pointer"
+                >
+                  Disconnect Destination Account
                 </button>
               )}
             </div>

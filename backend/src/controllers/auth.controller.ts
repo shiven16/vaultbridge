@@ -116,3 +116,46 @@ export async function getMe(req: AuthRequest, res: Response, next: NextFunction)
     next(error);
   }
 }
+
+export async function disconnect(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+  try {
+    if (!req.userId) {
+      throw new AppError('Unauthorized', 401);
+    }
+    const { type } = req.body;
+    
+    if (type === 'destination') {
+      await prisma.user.update({
+        where: { id: req.userId },
+        data: {
+          destEmail: null,
+          destAccessToken: null,
+          destRefreshToken: null,
+          destExpiryDate: null,
+        },
+      });
+      logger.info(`User disconnected destination account`);
+    } else if (type === 'source') {
+      await prisma.user.update({
+        where: { id: req.userId },
+        data: {
+          sourceEmail: null,
+          sourceAccessToken: null,
+          sourceRefreshToken: null,
+          sourceExpiryDate: null,
+        },
+      });
+      res.clearCookie('token', {
+        httpOnly: true,
+        secure: env.NODE_ENV === 'production',
+        sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
+      });
+      logger.info(`User disconnected source account and logged out`);
+    } else {
+       throw new AppError('Invalid account type', 400);
+    }
+    res.json({ message: `Successfully disconnected ${type} account` });
+  } catch(error) {
+    next(error);
+  }
+}

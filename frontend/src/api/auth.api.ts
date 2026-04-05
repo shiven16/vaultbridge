@@ -22,3 +22,7 @@ export async function handleCallback(code: string, type: string): Promise<Callba
   });
   return response.data;
 }
+
+export async function disconnectAccount(type: "source" | "destination"): Promise<void> {
+  await apiClient.post("/auth/disconnect", { type });
+}
