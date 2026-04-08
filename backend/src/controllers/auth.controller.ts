@@ -149,12 +149,7 @@ export async function disconnect(
           sourceExpiryDate: null,
         },
       });
-      res.clearCookie('token', {
-        httpOnly: true,
-        secure: env.NODE_ENV === 'production',
-        sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
-      });
-      logger.info(`User disconnected source account and logged out`);
+      logger.info(`User disconnected source account`);
     } else {
       throw new AppError('Invalid account type', 400);
     }

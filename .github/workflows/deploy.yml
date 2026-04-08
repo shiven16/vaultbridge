@@ -1,109 +1,109 @@
-name: Deploy
+# name: Deploy
 
-on:
-  push:
-    branches: [main]
+# on:
+#   push:
+#     branches: [main]
 
-jobs:
-  deploy:
-    name: Deploy to EC2
-    runs-on: ubuntu-latest
+# jobs:
+#   deploy:
+#     name: Deploy to EC2
+#     runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+#     steps:
+#       - name: Checkout repository
+#         uses: actions/checkout@v4
 
-      - name: Setup SSH key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/ec2_key
-          chmod 600 ~/.ssh/ec2_key
+#       - name: Setup SSH key
+#         run: |
+#           mkdir -p ~/.ssh
+#           echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/ec2_key
+#           chmod 600 ~/.ssh/ec2_key
 
-      - name: Deploy to EC2
-        run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/ec2_key ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'DEPLOY_SCRIPT'
-            set -e
+#       - name: Deploy to EC2
+#         run: |
+#           ssh -o StrictHostKeyChecking=no -i ~/.ssh/ec2_key ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'DEPLOY_SCRIPT'
+#             set -e
 
-            # ──────────────────────────
-            # Setup Node.js v20
-            # ──────────────────────────
-            # Load NVM to upgrade Node if it exists
-            export NVM_DIR="$HOME/.nvm"
-            if [ -s "$NVM_DIR/nvm.sh" ]; then
-              \. "$NVM_DIR/nvm.sh"
-              nvm install 20
-              nvm use 20
-              nvm alias default 20
-              # Ensure pm2 is available on the new node version
-              npm install -g pm2
-            fi
+#             # ──────────────────────────
+#             # Setup Node.js v20
+#             # ──────────────────────────
+#             # Load NVM to upgrade Node if it exists
+#             export NVM_DIR="$HOME/.nvm"
+#             if [ -s "$NVM_DIR/nvm.sh" ]; then
+#               \. "$NVM_DIR/nvm.sh"
+#               nvm install 20
+#               nvm use 20
+#               nvm alias default 20
+#               # Ensure pm2 is available on the new node version
+#               npm install -g pm2
+#             fi
             
-            # Verify node version and force upgrade via apt if needed
-            NODE_MAJOR=$(node -v | cut -d. -f1 | sed 's/v//')
-            if [ "$NODE_MAJOR" -lt 20 ]; then
-                echo "⚠️ Node.js is v$NODE_MAJOR. Upgrading to Node.js v20..."
-                curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-                sudo apt-get install -y nodejs
+#             # Verify node version and force upgrade via apt if needed
+#             NODE_MAJOR=$(node -v | cut -d. -f1 | sed 's/v//')
+#             if [ "$NODE_MAJOR" -lt 20 ]; then
+#                 echo "⚠️ Node.js is v$NODE_MAJOR. Upgrading to Node.js v20..."
+#                 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+#                 sudo apt-get install -y nodejs
                 
-                # Re-verify post-install
-                NODE_MAJOR_NEW=$(node -v | cut -d. -f1 | sed 's/v//')
-                if [ "$NODE_MAJOR_NEW" -lt 20 ]; then
-                  echo "❌ Failed to install Node.js v20. Current version is v$NODE_MAJOR_NEW."
-                  exit 1
-                fi
-                echo "✅ Successfully upgraded Node.js to v$NODE_MAJOR_NEW"
+#                 # Re-verify post-install
+#                 NODE_MAJOR_NEW=$(node -v | cut -d. -f1 | sed 's/v//')
+#                 if [ "$NODE_MAJOR_NEW" -lt 20 ]; then
+#                   echo "❌ Failed to install Node.js v20. Current version is v$NODE_MAJOR_NEW."
+#                   exit 1
+#                 fi
+#                 echo "✅ Successfully upgraded Node.js to v$NODE_MAJOR_NEW"
                 
-                # Reinstall pm2 globally for the new node version
-                sudo npm install -g pm2
-            fi
+#                 # Reinstall pm2 globally for the new node version
+#                 sudo npm install -g pm2
+#             fi
 
-            APP_DIR=~/vaultbridge
+#             APP_DIR=~/vaultbridge
 
-            # Clone or pull latest code
-            if [ ! -d "$APP_DIR" ]; then
-              git clone https://github.com/${{ github.repository }}.git "$APP_DIR"
-            fi
+#             # Clone or pull latest code
+#             if [ ! -d "$APP_DIR" ]; then
+#               git clone https://github.com/${{ github.repository }}.git "$APP_DIR"
+#             fi
 
-            cd "$APP_DIR"
-            git fetch origin main
-            git reset --hard origin/main
+#             cd "$APP_DIR"
+#             git fetch origin main
+#             git reset --hard origin/main
 
-            # ──────────────────────────
-            # Backend
-            # ──────────────────────────
-            echo "Setting up backend..."
-            cd "$APP_DIR/backend"
+#             # ──────────────────────────
+#             # Backend
+#             # ──────────────────────────
+#             echo "Setting up backend..."
+#             cd "$APP_DIR/backend"
             
-            # Build the docker image
-            docker build -t vaultbridge-backend .
+#             # Build the docker image
+#             docker build -t vaultbridge-backend .
             
-            # Stop existing container if it exists
-            if docker ps -a --format '{{.Names}}' | grep -q "^vaultbridge-backend$"; then
-              docker stop vaultbridge-backend
-              docker rm vaultbridge-backend
-            fi
+#             # Stop existing container if it exists
+#             if docker ps -a --format '{{.Names}}' | grep -q "^vaultbridge-backend$"; then
+#               docker stop vaultbridge-backend
+#               docker rm vaultbridge-backend
+#             fi
             
-            # Run the new container, using host network so it can connect to local DB
-            docker run -d --name vaultbridge-backend --network="host" --env-file .env vaultbridge-backend
+#             # Run the new container, using host network so it can connect to local DB
+#             docker run -d --name vaultbridge-backend --network="host" --env-file .env vaultbridge-backend
 
-            # ──────────────────────────
-            # Frontend
-            # ──────────────────────────
-            echo "📦 Setting up frontend..."
-            cd "$APP_DIR/frontend"
-            npm install
-            npm run build
+#             # ──────────────────────────
+#             # Frontend
+#             # ──────────────────────────
+#             echo "📦 Setting up frontend..."
+#             cd "$APP_DIR/frontend"
+#             npm install
+#             npm run build
 
-            # Serve frontend static files with PM2
-            if pm2 describe vaultbridge-frontend > /dev/null 2>&1; then
-              pm2 restart vaultbridge-frontend
-            else
-              pm2 start npx --name vaultbridge-frontend -- serve dist -s -l 4173
-            fi
+#             # Serve frontend static files with PM2
+#             if pm2 describe vaultbridge-frontend > /dev/null 2>&1; then
+#               pm2 restart vaultbridge-frontend
+#             else
+#               pm2 start npx --name vaultbridge-frontend -- serve dist -s -l 4173
+#             fi
 
-            echo "Deployment complete!"
-          DEPLOY_SCRIPT
+#             echo "Deployment complete!"
+#           DEPLOY_SCRIPT
 
-      - name: Cleanup SSH key
-        if: always()
-        run: rm -f ~/.ssh/ec2_key
+#       - name: Cleanup SSH key
+#         if: always()
+#         run: rm -f ~/.ssh/ec2_key
