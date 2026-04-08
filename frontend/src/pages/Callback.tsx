@@ -15,7 +15,10 @@ export default function Callback() {
       if (isProcessing.current) return;
 
       const code = searchParams.get("code");
-      const type = searchParams.get("state") || searchParams.get("type") || (sourceAccount ? "destination" : "source");
+      const type =
+        searchParams.get("state") ||
+        searchParams.get("type") ||
+        (sourceAccount ? "destination" : "source");
 
       if (!code) {
         setError("Missing authorization code");
@@ -27,7 +30,7 @@ export default function Callback() {
       try {
         await apiHandleCallback(code, type);
         await refreshAuth();
-        navigate("/login"); 
+        navigate("/login");
       } catch (err) {
         isProcessing.current = false;
         setError(err instanceof Error ? err.message : "Authentication failed");
@@ -35,12 +38,7 @@ export default function Callback() {
     };
 
     processCallback();
-  }, [
-    searchParams,
-    navigate,
-    sourceAccount,
-    refreshAuth,
-  ]);
+  }, [searchParams, navigate, sourceAccount, refreshAuth]);
 
   if (error) {
     return (

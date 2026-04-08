@@ -27,9 +27,7 @@ export function useTransfer() {
   );
 
   const startTransfers = useCallback(
-    async (
-      files: { fileId: string; fileName: string; mimeType: string }[]
-    ) => {
+    async (files: { fileId: string; fileName: string; mimeType: string }[]) => {
       setIsTransferring(true);
 
       // Initialize all transfers as pending

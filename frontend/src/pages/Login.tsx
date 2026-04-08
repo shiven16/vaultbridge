@@ -4,7 +4,8 @@ import { getLoginUrl, disconnectAccount } from "../api/auth.api";
 
 export default function Login() {
   const navigate = useNavigate();
-  const { sourceAccount, destinationAccount, isFullyConnected, refreshAuth } = useAuth();
+  const { sourceAccount, destinationAccount, isFullyConnected, refreshAuth } =
+    useAuth();
 
   const handleConnectSource = () => {
     window.location.href = getLoginUrl("source");

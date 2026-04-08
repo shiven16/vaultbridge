@@ -82,7 +82,10 @@ export async function refreshAccessToken(refreshToken: string): Promise<{
   };
 }
 
-export async function getValidTokenForUser(userId: string, type: 'source' | 'destination'): Promise<string> {
+export async function getValidTokenForUser(
+  userId: string,
+  type: 'source' | 'destination',
+): Promise<string> {
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) throw new AppError('User not found', 404);
 
@@ -99,13 +102,16 @@ export async function getValidTokenForUser(userId: string, type: 'source' | 'des
     const plainRefresh = decrypt(refreshTokenEnc);
     const newCreds = await refreshAccessToken(plainRefresh);
 
-    const updateData = type === 'source' ? {
-      sourceAccessToken: newCreds.accessToken,
-      sourceExpiryDate: new Date(newCreds.expiryDate),
-    } : {
-      destAccessToken: newCreds.accessToken,
-      destExpiryDate: new Date(newCreds.expiryDate),
-    };
+    const updateData =
+      type === 'source'
+        ? {
+            sourceAccessToken: newCreds.accessToken,
+            sourceExpiryDate: new Date(newCreds.expiryDate),
+          }
+        : {
+            destAccessToken: newCreds.accessToken,
+            destExpiryDate: new Date(newCreds.expiryDate),
+          };
 
     await prisma.user.update({ where: { id: userId }, data: updateData });
     return newCreds.accessToken;

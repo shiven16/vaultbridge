@@ -117,13 +117,17 @@ export async function getMe(req: AuthRequest, res: Response, next: NextFunction)
   }
 }
 
-export async function disconnect(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+export async function disconnect(
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
   try {
     if (!req.userId) {
       throw new AppError('Unauthorized', 401);
     }
     const { type } = req.body;
-    
+
     if (type === 'destination') {
       await prisma.user.update({
         where: { id: req.userId },
@@ -152,10 +156,10 @@ export async function disconnect(req: AuthRequest, res: Response, next: NextFunc
       });
       logger.info(`User disconnected source account and logged out`);
     } else {
-       throw new AppError('Invalid account type', 400);
+      throw new AppError('Invalid account type', 400);
     }
     res.json({ message: `Successfully disconnected ${type} account` });
-  } catch(error) {
+  } catch (error) {
     next(error);
   }
 }

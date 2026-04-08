@@ -14,10 +14,12 @@ const app = express();
 
 // Security
 app.use(helmet());
-app.use(cors({ 
-  origin: env.FRONTEND_URL || true, 
-  credentials: true 
-})); // Restricts CORS if FRONTEND_URL is provided, else reflects origin
+app.use(
+  cors({
+    origin: env.FRONTEND_URL || true,
+    credentials: true,
+  }),
+); // Restricts CORS if FRONTEND_URL is provided, else reflects origin
 app.use(cookieParser());
 
 // Rate limiting

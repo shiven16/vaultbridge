@@ -11,11 +11,15 @@ const createTransferSchema = z.object({
 });
 
 const createBatchTransferSchema = z.object({
-  files: z.array(z.object({
-    fileId: z.string().min(1, 'fileId is required'),
-    fileName: z.string().min(1, 'fileName is required'),
-    mimeType: z.string().optional(),
-  })).min(1, 'At least one file is required'),
+  files: z
+    .array(
+      z.object({
+        fileId: z.string().min(1, 'fileId is required'),
+        fileName: z.string().min(1, 'fileName is required'),
+        mimeType: z.string().optional(),
+      }),
+    )
+    .min(1, 'At least one file is required'),
 });
 
 export async function createTransfer(

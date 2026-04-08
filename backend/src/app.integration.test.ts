@@ -18,6 +18,6 @@ describe('App Integration Tests', () => {
   it('GET /drive/files should return 401 Unauthorized when missing token', async () => {
     const res = await request(app).get('/drive/files');
     expect(res.status).toBe(401);
-    expect(res.body.error).toMatch(/authorization/i);
+    expect(res.body.error).toMatch(/token/i);
   });
 });

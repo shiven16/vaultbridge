@@ -42,7 +42,7 @@ export async function processQueue(userId: string) {
   if (pendingTransfers.length === 0) return;
 
   await prisma.transfer.updateMany({
-    where: { id: { in: pendingTransfers.map(t => t.id) } },
+    where: { id: { in: pendingTransfers.map((t) => t.id) } },
     data: { status: 'in_progress', startedAt: new Date() },
   });
 
@@ -63,10 +63,12 @@ export async function processQueue(userId: string) {
       .catch((error) => {
         logger.error(`Queue Background error for ${transfer.id}:`, error);
         // Ensure failed transfers are marked failed immediately even if Google throws before executeTransfer
-        prisma.transfer.update({
-          where: { id: transfer.id },
-          data: { status: 'failed', error: String(error), finishedAt: new Date() },
-        }).catch(() => {});
+        prisma.transfer
+          .update({
+            where: { id: transfer.id },
+            data: { status: 'failed', error: String(error), finishedAt: new Date() },
+          })
+          .catch(() => {});
       })
       .finally(() => {
         processQueue(userId).catch((err) => logger.error(`Failed to trigger next: ${err}`));
