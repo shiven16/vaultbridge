@@ -27,7 +27,7 @@ export async function callback(req: Request, res: Response, next: NextFunction):
 
     const tokens = await googleService.getTokensFromCode(code);
     const userInfo = await googleService.getUserInfo(tokens.accessToken);
-    const encryptedRefreshToken = encrypt(tokens.refreshToken);
+    const encryptedRefreshToken = tokens.refreshToken ? encrypt(tokens.refreshToken) : undefined;
 
     let user;
     let sessionToken = req.cookies?.token;
@@ -42,7 +42,7 @@ export async function callback(req: Request, res: Response, next: NextFunction):
         data: {
           destEmail: userInfo.email,
           destAccessToken: tokens.accessToken,
-          destRefreshToken: encryptedRefreshToken,
+          ...(encryptedRefreshToken && { destRefreshToken: encryptedRefreshToken }),
           destExpiryDate: new Date(tokens.expiryDate),
         },
       });
@@ -56,7 +56,7 @@ export async function callback(req: Request, res: Response, next: NextFunction):
           name: userInfo.name,
           sourceEmail: userInfo.email,
           sourceAccessToken: tokens.accessToken,
-          sourceRefreshToken: encryptedRefreshToken,
+          ...(encryptedRefreshToken && { sourceRefreshToken: encryptedRefreshToken }),
           sourceExpiryDate: new Date(tokens.expiryDate),
         },
         create: {
@@ -65,7 +65,7 @@ export async function callback(req: Request, res: Response, next: NextFunction):
           name: userInfo.name,
           sourceEmail: userInfo.email,
           sourceAccessToken: tokens.accessToken,
-          sourceRefreshToken: encryptedRefreshToken,
+          ...(encryptedRefreshToken && { sourceRefreshToken: encryptedRefreshToken }),
           sourceExpiryDate: new Date(tokens.expiryDate),
         },
       });

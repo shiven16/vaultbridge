@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { handleCallback as apiHandleCallback } from "../api/auth.api";
@@ -8,22 +8,28 @@ export default function Callback() {
   const navigate = useNavigate();
   const { sourceAccount, refreshAuth } = useAuth();
   const [error, setError] = useState<string | null>(null);
+  const isProcessing = useRef(false);
 
   useEffect(() => {
     const processCallback = async () => {
+      if (isProcessing.current) return;
+
       const code = searchParams.get("code");
-      const type = searchParams.get("type") || (sourceAccount ? "destination" : "source");
+      const type = searchParams.get("state") || searchParams.get("type") || (sourceAccount ? "destination" : "source");
 
       if (!code) {
         setError("Missing authorization code");
         return;
       }
 
+      isProcessing.current = true;
+
       try {
         await apiHandleCallback(code, type);
         await refreshAuth();
-        navigate("/"); // or "/dashboard" depending on your UX!
+        navigate("/login"); 
       } catch (err) {
+        isProcessing.current = false;
         setError(err instanceof Error ? err.message : "Authentication failed");
       }
     };

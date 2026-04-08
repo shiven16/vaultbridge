@@ -18,7 +18,7 @@ export function getAuthUrl(state?: string): string {
 
 export interface GoogleTokens {
   accessToken: string;
-  refreshToken: string;
+  refreshToken?: string;
   expiryDate: number;
 }
 
@@ -26,13 +26,13 @@ export async function getTokensFromCode(code: string): Promise<GoogleTokens> {
   const oauth2Client = createOAuth2Client();
   const { tokens } = await oauth2Client.getToken(code);
 
-  if (!tokens.access_token || !tokens.refresh_token) {
-    throw new Error('Failed to obtain tokens from Google');
+  if (!tokens.access_token) {
+    throw new Error('Failed to obtain access token from Google');
   }
 
   return {
     accessToken: tokens.access_token,
-    refreshToken: tokens.refresh_token,
+    refreshToken: tokens.refresh_token || undefined,
     expiryDate: tokens.expiry_date ?? Date.now() + 3600 * 1000,
   };
 }
