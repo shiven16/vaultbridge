@@ -64,7 +64,10 @@ export default function FileList({
   );
 
   const selectAll = useCallback(() => {
-    onSelectionChange(files);
+    const transferableFiles = files.filter(
+      (f) => !f.mimeType.startsWith("application/vnd.google-apps.")
+    );
+    onSelectionChange(transferableFiles);
   }, [files, onSelectionChange]);
 
   const deselectAll = useCallback(() => {

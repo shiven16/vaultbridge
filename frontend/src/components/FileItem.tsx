@@ -44,25 +44,34 @@ export default function FileItem({
   isSelected,
   onToggle,
 }: FileItemProps) {
+  const isVirtual = file.mimeType.startsWith("application/vnd.google-apps.");
+
   return (
     <div
-      onClick={() => onToggle(file)}
-      className={`group flex cursor-pointer items-center gap-3 rounded-xl border p-3.5 transition-all duration-200
+      onClick={() => {
+        if (!isVirtual) onToggle(file);
+      }}
+      className={`group flex items-center gap-3 rounded-xl border p-3.5 transition-all duration-200
         ${
           isSelected
-            ? "border-primary-500/40 bg-primary-500/10 shadow-lg shadow-primary-500/5"
-            : "border-white/[0.06] bg-surface-800/30 hover:border-white/[0.12] hover:bg-surface-800/60"
+            ? "border-primary-500/40 bg-primary-500/10 shadow-lg shadow-primary-500/5 cursor-pointer"
+            : isVirtual
+              ? "border-white/[0.04] bg-surface-800/10 opacity-75 cursor-not-allowed"
+              : "border-white/[0.06] bg-surface-800/30 hover:border-white/[0.12] hover:bg-surface-800/60 cursor-pointer"
         }`}
+      title={isVirtual ? "Google Workspace files cannot be transferred directly" : undefined}
     >
       <div
         className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 transition-all duration-200
           ${
             isSelected
               ? "border-primary-500 bg-primary-500"
-              : "border-surface-500 group-hover:border-surface-400"
+              : isVirtual
+                ? "border-surface-600/50 bg-surface-700/20"
+                : "border-surface-500 group-hover:border-surface-400"
           }`}
       >
-        {isSelected && (
+        {isSelected && !isVirtual && (
           <svg
             width="12"
             height="12"
@@ -81,12 +90,21 @@ export default function FileItem({
       <span className="text-lg">{getFileIcon(file.mimeType)}</span>
 
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium text-surface-100">
+        <p
+          className={`truncate text-sm font-medium ${
+            isVirtual ? "text-surface-300" : "text-surface-100"
+          }`}
+        >
           {file.name}
         </p>
-        <p className="mt-0.5 text-xs text-surface-500">
-          {formatFileSize(file.size)}
-        </p>
+        <div className="mt-0.5 flex items-center gap-2 text-xs text-surface-500">
+          <span>{formatFileSize(file.size)}</span>
+          {isVirtual && (
+            <span className="text-danger flex items-center gap-1 font-medium">
+              ❌ (Workspace file — cannot transfer directly)
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );
