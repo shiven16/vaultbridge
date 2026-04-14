@@ -8,7 +8,7 @@ const createTransferSchema = z.object({
   fileId: z.string().min(1, 'fileId is required'),
   fileName: z.string().min(1, 'fileName is required'),
   mimeType: z.string().optional(),
-  sourceType: z.enum(['drive', 'photos', 'gcs', 'gmail']).default('drive'),
+  sourceType: z.enum(['drive', 'gcs', 'gmail']).default('drive'),
 });
 
 const createBatchTransferSchema = z.object({
@@ -21,7 +21,7 @@ const createBatchTransferSchema = z.object({
       }),
     )
     .min(1, 'At least one file is required'),
-  sourceType: z.enum(['drive', 'photos', 'gcs', 'gmail']).default('drive'),
+  sourceType: z.enum(['drive', 'gcs', 'gmail']).default('drive'),
 });
 
 export async function createTransfer(

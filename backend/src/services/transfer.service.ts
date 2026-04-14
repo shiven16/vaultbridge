@@ -1,7 +1,6 @@
 import { prisma } from '../database/prisma.js';
 import * as driveService from './drive.service.js';
 import * as googleService from './google.service.js';
-import * as photosService from './photos.service.js';
 import * as gcsService from './gcs.service.js';
 import * as gmailService from './gmail.service.js';
 import { logger } from '../utils/logger.js';
@@ -14,7 +13,7 @@ export interface TransferInput {
   fileId: string;
   fileName: string;
   mimeType?: string;
-  sourceType: 'drive' | 'photos' | 'gcs' | 'gmail';
+  sourceType: 'drive' | 'gcs' | 'gmail';
 }
 
 export interface BatchTransferInput {
@@ -24,7 +23,7 @@ export interface BatchTransferInput {
     fileName: string;
     mimeType?: string;
   }>;
-  sourceType: 'drive' | 'photos' | 'gcs' | 'gmail';
+  sourceType: 'drive' | 'gcs' | 'gmail';
 }
 
 export async function processQueue(userId: string) {
@@ -130,16 +129,14 @@ async function executeTransfer(
   fileId: string,
   fileName: string,
   mimeType: string,
-  sourceType: 'drive' | 'photos' | 'gcs' | 'gmail',
+  sourceType: 'drive' | 'gcs' | 'gmail',
 ): Promise<void> {
   try {
     logger.info(`Executing transfer ${transferId}: ${fileName} from ${sourceType}`);
 
     // Step 1: Download file as a stream from source account
     let downloadStream;
-    if (sourceType === 'photos') {
-      downloadStream = await photosService.downloadPhotoStream(sourceAccessToken, fileId);
-    } else if (sourceType === 'gcs') {
+    if (sourceType === 'gcs') {
       downloadStream = await gcsService.downloadGCSStream(sourceAccessToken, fileId);
     } else if (sourceType === 'gmail') {
       downloadStream = await gmailService.downloadGmailAttachmentStream(sourceAccessToken, fileId);

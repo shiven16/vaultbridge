@@ -16,7 +16,6 @@ enum TransferStatus {
 
 enum TransferSource {
   drive
-  photos
   gcs
   gmail
 }

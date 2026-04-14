@@ -1,7 +1,7 @@
 import { google } from 'googleapis';
 import { Readable } from 'stream';
 import { createOAuth2Client } from '../config/google.config.js';
-import { logger } from '../utils/logger.js';
+
 import { DriveFileListResult } from './drive.service.js';
 
 function createGmailAPI(accessToken: string) {

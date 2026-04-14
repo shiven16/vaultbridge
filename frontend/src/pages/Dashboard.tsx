@@ -12,7 +12,7 @@ export default function Dashboard() {
   const { transfers, isTransferring, startTransfers, clearTransfers } =
     useTransfer();
   const [selectedFiles, setSelectedFiles] = useState<DriveFile[]>([]);
-  const [sourceType, setSourceType] = useState<"drive" | "photos" | "gcs" | "gmail">("drive");
+  const [sourceType, setSourceType] = useState<"drive" | "gcs" | "gmail">("drive");
 
   const handleRemoveFile = useCallback((fileId: string) => {
     setSelectedFiles((prev) => prev.filter((f) => f.id !== fileId));
@@ -139,7 +139,6 @@ export default function Dashboard() {
               className="rounded bg-surface-800 px-2 py-1 text-xs text-white border border-white/10 outline-none"
             >
               <option value="drive">Google Drive</option>
-              <option value="photos">Google Photos</option>
               <option value="gmail">Gmail Attachments</option>
               <option value="gcs">Google Cloud Storage</option>
             </select>
