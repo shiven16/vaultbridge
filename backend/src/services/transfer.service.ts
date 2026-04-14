@@ -62,7 +62,7 @@ export async function processQueue(userId: string) {
           transfer.sourceFileId,
           transfer.fileName,
           'application/octet-stream',
-          transfer.sourceType as any,
+          transfer.sourceType as 'drive' | 'gcs' | 'gmail',
         );
       })
       .catch((error) => {

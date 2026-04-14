@@ -40,7 +40,7 @@ export async function listGCSFiles(
         bucketName = bucketsRes.data.items[0].name || '';
         break;
       }
-    } catch(e) {
+    } catch {
       // User might not have storage permissions on this project
       logger.info(`Could not list buckets on ${project.projectId}`);
       continue;

@@ -135,7 +135,7 @@ export default function Dashboard() {
             </h2>
             <select
               value={sourceType}
-              onChange={(e) => setSourceType(e.target.value as any)}
+              onChange={(e) => setSourceType(e.target.value as "drive" | "gcs" | "gmail")}
               className="rounded bg-surface-800 px-2 py-1 text-xs text-white border border-white/10 outline-none"
             >
               <option value="drive">Google Drive</option>
