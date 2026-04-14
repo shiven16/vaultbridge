@@ -5,11 +5,13 @@ import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
 import authRoutes from './routes/auth.routes.js';
 import driveRoutes from './routes/drive.routes.js';
+import sourcesRoutes from './routes/sources.routes.js';
 import transferRoutes from './routes/transfer.routes.js';
 import { errorMiddleware } from './middlewares/error.middleware.js';
 
 import { env } from './config/env.js';
 
+// Force restart node process to load updated Prisma Client
 const app = express();
 
 // Security
@@ -43,6 +45,7 @@ app.get('/health', (_req, res) => {
 // Routes
 app.use('/auth', authRoutes);
 app.use('/drive', driveRoutes);
+app.use('/sources', sourcesRoutes);
 app.use('/transfer', transferRoutes);
 
 // Error handling (must be last)

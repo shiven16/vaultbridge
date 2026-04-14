@@ -4,6 +4,7 @@ export interface TransferRequest {
   fileId: string;
   fileName: string;
   mimeType?: string;
+  sourceType: "drive" | "photos" | "gcs" | "gmail";
 }
 
 export interface TransferResponse {

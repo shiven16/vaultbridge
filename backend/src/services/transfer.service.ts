@@ -1,6 +1,9 @@
 import { prisma } from '../database/prisma.js';
 import * as driveService from './drive.service.js';
 import * as googleService from './google.service.js';
+import * as photosService from './photos.service.js';
+import * as gcsService from './gcs.service.js';
+import * as gmailService from './gmail.service.js';
 import { logger } from '../utils/logger.js';
 
 const MAX_CONCURRENT_TRANSFERS = 3;
@@ -11,6 +14,7 @@ export interface TransferInput {
   fileId: string;
   fileName: string;
   mimeType?: string;
+  sourceType: 'drive' | 'photos' | 'gcs' | 'gmail';
 }
 
 export interface BatchTransferInput {
@@ -20,6 +24,7 @@ export interface BatchTransferInput {
     fileName: string;
     mimeType?: string;
   }>;
+  sourceType: 'drive' | 'photos' | 'gcs' | 'gmail';
 }
 
 export async function processQueue(userId: string) {
@@ -58,6 +63,7 @@ export async function processQueue(userId: string) {
           transfer.sourceFileId,
           transfer.fileName,
           'application/octet-stream',
+          transfer.sourceType as any,
         );
       })
       .catch((error) => {
@@ -82,6 +88,7 @@ export async function initiateTransfer(input: TransferInput): Promise<string> {
       userId: input.userId,
       sourceFileId: input.fileId,
       fileName: input.fileName,
+      sourceType: input.sourceType,
       status: 'pending',
     },
   });
@@ -102,6 +109,7 @@ export async function initiateBatchTransfer(input: BatchTransferInput): Promise<
         userId: input.userId,
         sourceFileId: file.fileId,
         fileName: file.fileName,
+        sourceType: input.sourceType,
         status: 'pending',
       },
     });
@@ -122,12 +130,22 @@ async function executeTransfer(
   fileId: string,
   fileName: string,
   mimeType: string,
+  sourceType: 'drive' | 'photos' | 'gcs' | 'gmail',
 ): Promise<void> {
   try {
-    logger.info(`Executing transfer ${transferId}: ${fileName}`);
+    logger.info(`Executing transfer ${transferId}: ${fileName} from ${sourceType}`);
 
     // Step 1: Download file as a stream from source account
-    const downloadStream = await driveService.downloadFileStream(sourceAccessToken, fileId);
+    let downloadStream;
+    if (sourceType === 'photos') {
+      downloadStream = await photosService.downloadPhotoStream(sourceAccessToken, fileId);
+    } else if (sourceType === 'gcs') {
+      downloadStream = await gcsService.downloadGCSStream(sourceAccessToken, fileId);
+    } else if (sourceType === 'gmail') {
+      downloadStream = await gmailService.downloadGmailAttachmentStream(sourceAccessToken, fileId);
+    } else {
+      downloadStream = await driveService.downloadFileStream(sourceAccessToken, fileId);
+    }
 
     // Step 2: Pipe the stream directly to upload on destination account
     const uploadedFileId = await driveService.uploadFileStream(

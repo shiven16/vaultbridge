@@ -27,7 +27,9 @@ export function useTransfer() {
   );
 
   const startTransfers = useCallback(
-    async (files: { fileId: string; fileName: string; mimeType: string }[]) => {
+    async (
+      files: { fileId: string; fileName: string; mimeType: string; sourceType: "drive" | "photos" | "gcs" | "gmail" }[]
+    ) => {
       setIsTransferring(true);
 
       // Initialize all transfers as pending
@@ -47,6 +49,7 @@ export function useTransfer() {
             fileId: file.fileId,
             fileName: file.fileName,
             mimeType: file.mimeType,
+            sourceType: file.sourceType,
           };
 
           const response = await createTransfer(req);

@@ -12,6 +12,7 @@ export default function Dashboard() {
   const { transfers, isTransferring, startTransfers, clearTransfers } =
     useTransfer();
   const [selectedFiles, setSelectedFiles] = useState<DriveFile[]>([]);
+  const [sourceType, setSourceType] = useState<"drive" | "photos" | "gcs" | "gmail">("drive");
 
   const handleRemoveFile = useCallback((fileId: string) => {
     setSelectedFiles((prev) => prev.filter((f) => f.id !== fileId));
@@ -24,10 +25,11 @@ export default function Dashboard() {
       fileId: f.id,
       fileName: f.name,
       mimeType: f.mimeType,
+      sourceType,
     }));
 
     startTransfers(filesToTransfer);
-  }, [selectedFiles, sourceAccount, destinationAccount, startTransfers]);
+  }, [selectedFiles, sourceAccount, destinationAccount, sourceType, startTransfers]);
 
   // Redirect if not connected (must be after all hooks)
   if (!isFullyConnected || !sourceAccount || !destinationAccount) {
@@ -127,15 +129,26 @@ export default function Dashboard() {
       <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-0 lg:flex-row">
         {/* Left Panel - File List */}
         <div className="flex-1 border-r-0 border-white/[0.06] lg:border-r">
-          <div className="border-b border-white/[0.06] px-5 py-3">
+          <div className="flex items-center justify-between border-b border-white/[0.06] px-5 py-3">
             <h2 className="text-sm font-semibold text-white">
-              Source Drive Files
+              Source Files
             </h2>
+            <select
+              value={sourceType}
+              onChange={(e) => setSourceType(e.target.value as any)}
+              className="rounded bg-surface-800 px-2 py-1 text-xs text-white border border-white/10 outline-none"
+            >
+              <option value="drive">Google Drive</option>
+              <option value="photos">Google Photos</option>
+              <option value="gmail">Gmail Attachments</option>
+              <option value="gcs">Google Cloud Storage</option>
+            </select>
           </div>
           <FileList
             type="source"
             selectedFiles={selectedFiles}
             onSelectionChange={setSelectedFiles}
+            sourceType={sourceType}
           />
         </div>
 

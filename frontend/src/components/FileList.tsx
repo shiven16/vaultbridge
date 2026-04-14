@@ -1,26 +1,29 @@
 import { useState, useEffect, useCallback } from "react";
-import { listFiles, type DriveFile } from "../api/drive.api";
+import { listFiles, createPhotosSession, type DriveFile } from "../api/drive.api";
 import FileItem from "./FileItem";
 
 interface FileListProps {
   type: "source" | "destination";
   selectedFiles: DriveFile[];
   onSelectionChange: (files: DriveFile[]) => void;
+  sourceType?: "drive" | "photos" | "gcs" | "gmail";
 }
 
 export default function FileList({
   type,
   selectedFiles,
   onSelectionChange,
+  sourceType = "drive",
 }: FileListProps) {
   const [files, setFiles] = useState<DriveFile[]>([]);
   const [nextPageToken, setNextPageToken] = useState<string | undefined>();
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pickerSession, setPickerSession] = useState<{ sessionId: string; pickerUri: string } | null>(null);
 
   const fetchFiles = useCallback(
-    async (pageToken?: string) => {
+    async (pageToken?: string, customSessionId?: string) => {
       const isLoadingMore = !!pageToken;
       if (isLoadingMore) {
         setLoadingMore(true);
@@ -30,7 +33,15 @@ export default function FileList({
       setError(null);
 
       try {
-        const result = await listFiles(type, pageToken);
+        const sid = customSessionId || pickerSession?.sessionId || undefined;
+        // Do not fetch natively for photos unless we have a sessionId
+        if (sourceType === "photos" && !sid) {
+          setLoading(false);
+          setLoadingMore(false);
+          return;
+        }
+        
+        const result = await listFiles(type, pageToken, 20, sourceType, sid);
         if (isLoadingMore) {
           setFiles((prev) => [...prev, ...result.files]);
         } else {
@@ -44,12 +55,41 @@ export default function FileList({
         setLoadingMore(false);
       }
     },
-    [type],
+    [type, sourceType, pickerSession],
   );
 
   useEffect(() => {
-    fetchFiles();
-  }, [fetchFiles]);
+    // Reset state when sourceType changes
+    setFiles([]);
+    setNextPageToken(undefined);
+    setError(null);
+    setPickerSession(null);
+    
+    // For photos, we don't auto-fetch. We wait for session creation.
+    if (sourceType !== "photos") {
+      fetchFiles();
+    }
+  }, [fetchFiles, sourceType]);
+
+  const handleCreatePhotoSession = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const session = await createPhotosSession();
+      setPickerSession(session);
+      window.open(session.pickerUri, "_blank", "width=800,height=600");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to create picker session");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFetchPickedPhotos = () => {
+    if (pickerSession) {
+      fetchFiles(undefined, pickerSession.sessionId);
+    }
+  };
 
   const toggleFile = useCallback(
     (file: DriveFile) => {
@@ -112,12 +152,56 @@ export default function FileList({
     );
   }
 
+  if (sourceType === "photos" && !pickerSession && files.length === 0 && !loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-center px-4">
+        <span className="text-4xl mb-4">🖼️</span>
+        <h3 className="text-lg font-medium text-white mb-2">Google Photos Picker</h3>
+        <p className="text-sm text-surface-400 mb-6 max-w-sm">
+          Google Photos requires you to explicitly select which media items VaultBridge can access.
+        </p>
+        <button
+          onClick={handleCreatePhotoSession}
+          className="cursor-pointer rounded-xl bg-primary-600 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-500"
+        >
+          Open Photos Picker
+        </button>
+      </div>
+    );
+  }
+
+  if (sourceType === "photos" && pickerSession && files.length === 0 && !loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-center px-4">
+        <span className="text-4xl mb-4">⏳</span>
+        <h3 className="text-lg font-medium text-white mb-2">Waiting for Selection</h3>
+        <p className="text-sm text-surface-400 mb-6 max-w-sm">
+          A new window has been opened for you to pick your photos. Once you are done clicking "Done" inside the Google popup, click the button below.
+        </p>
+        <div className="flex gap-3">
+          <button
+            onClick={() => window.open(pickerSession.pickerUri, "_blank", "width=800,height=600")}
+            className="cursor-pointer rounded-xl border border-white/10 bg-transparent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-white/5"
+          >
+            Re-open Window
+          </button>
+          <button
+            onClick={handleFetchPickedPhotos}
+            className="cursor-pointer rounded-xl bg-primary-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-500"
+          >
+            I'm Done Picking
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (files.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
         <span className="text-4xl">📂</span>
         <p className="mt-3 text-sm text-surface-400">
-          No files found in your source Drive.
+          No files found in your {sourceType} source.
         </p>
       </div>
     );

@@ -8,6 +8,7 @@ const createTransferSchema = z.object({
   fileId: z.string().min(1, 'fileId is required'),
   fileName: z.string().min(1, 'fileName is required'),
   mimeType: z.string().optional(),
+  sourceType: z.enum(['drive', 'photos', 'gcs', 'gmail']).default('drive'),
 });
 
 const createBatchTransferSchema = z.object({
@@ -20,6 +21,7 @@ const createBatchTransferSchema = z.object({
       }),
     )
     .min(1, 'At least one file is required'),
+  sourceType: z.enum(['drive', 'photos', 'gcs', 'gmail']).default('drive'),
 });
 
 export async function createTransfer(
@@ -39,6 +41,7 @@ export async function createTransfer(
       fileId: body.fileId,
       fileName: body.fileName,
       mimeType: body.mimeType,
+      sourceType: body.sourceType,
     });
 
     res.status(202).json({
@@ -65,6 +68,7 @@ export async function createBatchTransfer(
     const transferIds = await transferService.initiateBatchTransfer({
       userId: req.userId,
       files: body.files,
+      sourceType: body.sourceType,
     });
 
     res.status(202).json({
