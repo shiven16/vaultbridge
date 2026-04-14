@@ -25,7 +25,7 @@ export async function listGCSFiles(
   const rm = createResourceManager(accessToken);
   const projectsRes = await rm.projects.list();
   const projects = projectsRes.data.projects || [];
-  
+
   const files = [];
 
   const storage = createStorageAPI(accessToken);
@@ -53,7 +53,7 @@ export async function listGCSFiles(
       maxResults: pageSize,
       pageToken: pageToken ?? undefined,
     });
-    
+
     for (const obj of objectsRes.data.items || []) {
       files.push({
         id: `${bucketName}|${obj.name}`,
@@ -76,8 +76,8 @@ export async function downloadGCSStream(accessToken: string, id: string): Promis
   const storage = createStorageAPI(accessToken);
   const response = await storage.objects.get(
     { bucket, object: objectName, alt: 'media' },
-    { responseType: 'stream' }
+    { responseType: 'stream' },
   );
-  
+
   return response.data as Readable;
 }

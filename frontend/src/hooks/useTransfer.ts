@@ -28,7 +28,12 @@ export function useTransfer() {
 
   const startTransfers = useCallback(
     async (
-      files: { fileId: string; fileName: string; mimeType: string; sourceType: "drive" | "gcs" | "gmail" }[]
+      files: {
+        fileId: string;
+        fileName: string;
+        mimeType: string;
+        sourceType: "drive" | "gcs" | "gmail";
+      }[],
     ) => {
       setIsTransferring(true);
 

@@ -59,7 +59,11 @@ export default function FileItem({
               ? "border-white/[0.04] bg-surface-800/10 opacity-75 cursor-not-allowed"
               : "border-white/[0.06] bg-surface-800/30 hover:border-white/[0.12] hover:bg-surface-800/60 cursor-pointer"
         }`}
-      title={isVirtual ? "Google Workspace files cannot be transferred directly" : undefined}
+      title={
+        isVirtual
+          ? "Google Workspace files cannot be transferred directly"
+          : undefined
+      }
     >
       <div
         className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 transition-all duration-200

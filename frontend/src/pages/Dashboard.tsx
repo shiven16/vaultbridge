@@ -12,7 +12,9 @@ export default function Dashboard() {
   const { transfers, isTransferring, startTransfers, clearTransfers } =
     useTransfer();
   const [selectedFiles, setSelectedFiles] = useState<DriveFile[]>([]);
-  const [sourceType, setSourceType] = useState<"drive" | "gcs" | "gmail">("drive");
+  const [sourceType, setSourceType] = useState<"drive" | "gcs" | "gmail">(
+    "drive",
+  );
 
   const handleRemoveFile = useCallback((fileId: string) => {
     setSelectedFiles((prev) => prev.filter((f) => f.id !== fileId));
@@ -29,7 +31,13 @@ export default function Dashboard() {
     }));
 
     startTransfers(filesToTransfer);
-  }, [selectedFiles, sourceAccount, destinationAccount, sourceType, startTransfers]);
+  }, [
+    selectedFiles,
+    sourceAccount,
+    destinationAccount,
+    sourceType,
+    startTransfers,
+  ]);
 
   // Redirect if not connected (must be after all hooks)
   if (!isFullyConnected || !sourceAccount || !destinationAccount) {
@@ -130,12 +138,12 @@ export default function Dashboard() {
         {/* Left Panel - File List */}
         <div className="flex-1 border-r-0 border-white/[0.06] lg:border-r">
           <div className="flex items-center justify-between border-b border-white/[0.06] px-5 py-3">
-            <h2 className="text-sm font-semibold text-white">
-              Source Files
-            </h2>
+            <h2 className="text-sm font-semibold text-white">Source Files</h2>
             <select
               value={sourceType}
-              onChange={(e) => setSourceType(e.target.value as "drive" | "gcs" | "gmail")}
+              onChange={(e) =>
+                setSourceType(e.target.value as "drive" | "gcs" | "gmail")
+              }
               className="rounded bg-surface-800 px-2 py-1 text-xs text-white border border-white/10 outline-none"
             >
               <option value="drive">Google Drive</option>

@@ -31,7 +31,11 @@ export async function listFiles(
     } else if (query.sourceType === 'gcs') {
       result = await gcsService.listGCSFiles(accessToken, query.pageToken, query.pageSize);
     } else if (query.sourceType === 'gmail') {
-      result = await gmailService.listGmailAttachments(accessToken, query.pageToken, query.pageSize);
+      result = await gmailService.listGmailAttachments(
+        accessToken,
+        query.pageToken,
+        query.pageSize,
+      );
     }
 
     res.json(result);
