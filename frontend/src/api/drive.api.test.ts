@@ -26,11 +26,12 @@ describe("Drive API Integration", () => {
 
     const result = await listFiles("source");
 
-    expect(apiClient.get).toHaveBeenCalledWith("/drive/files", {
+    expect(apiClient.get).toHaveBeenCalledWith("/sources/files", {
       params: {
         type: "source",
         pageToken: undefined,
         pageSize: 20,
+        sourceType: "drive",
       },
     });
     expect(result).toEqual(mockData);
