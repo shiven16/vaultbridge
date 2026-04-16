@@ -1,4 +1,4 @@
-import type { DriveFile } from "../api/drive.api";
+ import type { DriveFile } from "../api/drive.api";
 import type { TransferItem } from "../hooks/useTransfer";
 import TransferStatus from "./TransferStatus";
 
@@ -19,88 +19,85 @@ export default function TransferPanel({
 }: TransferPanelProps) {
   const hasTransfers = transfers.length > 0;
 
+  // Calculate total size
+  const totalSize = selectedFiles.reduce((acc, file) => acc + (parseInt(file.size, 10) || 0), 0);
+  const formattedSize = totalSize > 0 
+    ? (totalSize / (1024 * 1024)).toFixed(1) + " MB" 
+    : "—";
+
   return (
-    <div className="flex h-full flex-col">
-      {/* Header */}
-      <div className="border-b border-white/[0.06] px-5 py-3">
-        <h2 className="text-sm font-semibold text-white">Transfer Queue</h2>
+    <div className="flex h-full flex-col p-6 font-body">
+      <div className="mb-6">
+        <h2 className="font-headline font-bold text-on-surface text-xl tracking-tight">Transfer Panel</h2>
+        <p className="font-body italic text-base text-on-surface-variant mt-1">Queue Strategy</p>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="border-b border-outline-variant/20 mb-6 pb-2 flex items-center gap-2 text-on-surface font-headline font-bold">
+        <span className="material-symbols-outlined text-sm text-primary">sync</span>
+        Active Queue
+      </div>
+
+      <div className="flex-1 overflow-y-auto space-y-4 pr-1">
         {hasTransfers ? (
           <TransferStatus transfers={transfers} />
         ) : selectedFiles.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-surface-800/50">
-              <svg
-                width="28"
-                height="28"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                className="text-surface-500"
-              >
-                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-                <polyline points="14 2 14 8 20 8" />
-              </svg>
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-surface-container">
+              <span className="material-symbols-outlined text-3xl text-outline">queue</span>
             </div>
-            <p className="mt-4 text-sm text-surface-400">
-              Select files from the source drive
-            </p>
-            <p className="mt-1 text-xs text-surface-600">
-              They'll appear here for transfer
+            <p className="mt-4 text-sm font-headline text-on-surface">No assets queued</p>
+            <p className="mt-1 text-xs font-body italic text-on-surface-variant">
+              Select files from your repository
             </p>
           </div>
         ) : (
-          <div className="space-y-2">
-            {selectedFiles.map((file) => (
-              <div
-                key={file.id}
-                className="group flex items-center justify-between rounded-lg border border-white/[0.06] bg-surface-800/30 p-3 transition-colors hover:bg-surface-800/50"
-              >
-                <p className="min-w-0 flex-1 truncate text-sm text-surface-200">
-                  {file.name}
-                </p>
-                <button
+          selectedFiles.map((file) => (
+            <div key={file.id} className="p-3 bg-surface-container rounded-lg group relative border border-transparent hover:border-outline-variant/20 transition-colors">
+              <div className="flex justify-between items-start mb-1">
+                <span className="text-[10px] uppercase tracking-tighter font-bold text-outline">Source Asset</span>
+                <span 
                   onClick={() => onRemoveFile(file.id)}
-                  className="ml-2 shrink-0 cursor-pointer rounded-md border-none bg-transparent p-1 text-surface-600 opacity-0 transition-all group-hover:opacity-100 hover:text-danger"
+                  className="material-symbols-outlined text-outline text-xs cursor-pointer hover:text-error transition-colors"
                 >
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <line x1="18" y1="6" x2="6" y2="18" />
-                    <line x1="6" y1="6" x2="18" y2="18" />
-                  </svg>
-                </button>
+                  close
+                </span>
               </div>
-            ))}
-          </div>
+              <p className="text-xs font-semibold font-headline truncate text-on-surface">{file.name}</p>
+            </div>
+          ))
         )}
       </div>
 
-      {/* Transfer Button */}
       {selectedFiles.length > 0 && !hasTransfers && (
-        <div className="border-t border-white/[0.06] p-4">
+        <div className="mt-auto space-y-4 pt-6 bg-surface/90 backdrop-blur-sm sticky bottom-0 border-t border-outline-variant/10">
+          <div className="flex justify-between text-xs font-headline text-on-surface-variant mb-2">
+            <span>Selected Files</span>
+            <span className="font-bold text-on-surface">{selectedFiles.length} Items</span>
+          </div>
+          <div className="flex justify-between text-xs font-headline text-on-surface-variant mb-4">
+            <span>Total Estimated Size</span>
+            <span className="font-bold text-on-surface">{formattedSize}</span>
+          </div>
           <button
             onClick={onStartTransfer}
             disabled={isTransferring}
-            className="w-full cursor-pointer rounded-xl border-none bg-gradient-to-r from-primary-600 to-primary-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-primary-500/20 transition-all duration-200 hover:shadow-xl hover:shadow-primary-500/30 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+            className="w-full py-4 cursor-pointer bg-primary text-on-primary rounded-xl font-bold font-headline text-sm shadow-xl flex items-center justify-center gap-3 active:scale-95 transition-all disabled:opacity-50 hover:brightness-110"
           >
             {isTransferring ? (
-              <span className="flex items-center justify-center gap-2">
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-white" />
-                Transferring…
-              </span>
+              <>
+                <span className="material-symbols-outlined animate-spin">refresh</span>
+                Transferring...
+              </>
             ) : (
-              `Transfer ${selectedFiles.length} file${selectedFiles.length > 1 ? "s" : ""}`
+              <>
+                <span className="material-symbols-outlined">send</span>
+                Start Transfer
+              </>
             )}
           </button>
+          <p className="text-[10px] font-body text-center text-outline italic">
+            Encrypting end-to-end via VaultBridge Protocol
+          </p>
         </div>
       )}
     </div>

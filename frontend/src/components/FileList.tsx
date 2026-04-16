@@ -82,37 +82,25 @@ export default function FileList({
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-20">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary-500/20 border-t-primary-500" />
-        <p className="mt-4 text-sm text-surface-400">Loading files…</p>
+      <div className="flex flex-col items-center justify-center py-20 flex-1">
+        <span className="material-symbols-outlined text-4xl text-primary animate-spin">refresh</span>
+        <p className="mt-4 text-sm font-headline text-outline">Synchronizing data...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center py-20">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-danger/10">
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            className="text-danger"
-          >
-            <circle cx="12" cy="12" r="10" />
-            <line x1="15" y1="9" x2="9" y2="15" />
-            <line x1="9" y1="9" x2="15" y2="15" />
-          </svg>
+      <div className="flex flex-col items-center justify-center py-20 flex-1">
+        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-error-container">
+          <span className="material-symbols-outlined text-on-error-container">error</span>
         </div>
-        <p className="mt-3 text-sm text-danger">{error}</p>
+        <p className="mt-3 font-headline text-sm text-error font-bold">{error}</p>
         <button
           onClick={() => fetchFiles()}
-          className="mt-3 cursor-pointer rounded-lg bg-surface-800 px-4 py-2 text-xs font-medium text-white transition-colors hover:bg-surface-700"
+          className="mt-4 cursor-pointer rounded-lg bg-surface-container-highest px-6 py-2 text-sm font-bold font-headline text-on-surface transition-all hover:bg-surface-variant active:scale-95 shadow-sm"
         >
-          Try Again
+          Retry Connection
         </button>
       </div>
     );
@@ -120,43 +108,48 @@ export default function FileList({
 
   if (files.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-center">
-        <span className="text-4xl">📂</span>
-        <p className="mt-3 text-sm text-surface-400">
-          No files found in your {sourceType} source.
+      <div className="flex flex-col items-center justify-center py-20 text-center flex-1">
+        <div className="flex h-16 w-16 mb-4 items-center justify-center rounded-xl bg-surface-container">
+          <span className="material-symbols-outlined text-3xl text-outline">search_off</span>
+        </div>
+        <p className="font-headline font-bold text-on-surface text-lg">No assets found</p>
+        <p className="mt-1 text-sm text-outline font-body italic">
+          Try adjusting your source or checking your connection.
         </p>
       </div>
     );
   }
 
   return (
-    <div className="flex h-full flex-col">
-      {/* Header */}
-      <div className="flex items-center justify-between border-b border-white/[0.06] px-5 py-3">
-        <p className="text-sm font-medium text-surface-300">
-          {files.length} files{" "}
-          <span className="text-surface-500">
-            · {selectedFiles.length} selected
+    <div className="flex flex-col h-full w-full">
+      {/* Header Row */}
+      <div className="flex items-center justify-between px-2 mb-4">
+        <div className="flex items-center gap-3">
+          <span className="text-[10px] uppercase tracking-widest font-bold text-outline">Select Assets</span>
+          <span className="font-headline text-xs text-primary font-bold bg-primary/10 px-2 py-0.5 rounded-md">
+            {selectedFiles.length} selected
           </span>
-        </p>
+        </div>
         <div className="flex gap-2">
+          {selectedFiles.length > 0 && (
+            <button
+              onClick={deselectAll}
+              className="font-headline cursor-pointer rounded-md hover:bg-surface-container px-3 py-1 text-xs font-bold text-outline transition-colors hover:text-on-surface"
+            >
+              Clear
+            </button>
+          )}
           <button
             onClick={selectAll}
-            className="cursor-pointer rounded-md bg-surface-800/60 px-2.5 py-1 text-xs text-surface-400 transition-colors hover:text-white"
+            className="font-headline cursor-pointer rounded-md bg-surface-container-high px-3 py-1 text-xs font-bold text-on-surface transition-all hover:bg-surface-container-highest shadow-sm"
           >
-            Select All
-          </button>
-          <button
-            onClick={deselectAll}
-            className="cursor-pointer rounded-md bg-surface-800/60 px-2.5 py-1 text-xs text-surface-400 transition-colors hover:text-white"
-          >
-            Clear
+            Select All Eligible
           </button>
         </div>
       </div>
 
-      {/* File List */}
-      <div className="flex-1 space-y-2 overflow-y-auto p-4">
+      {/* File Grid */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 auto-rows-max overflow-y-auto pb-6 pr-2">
         {files.map((file) => (
           <FileItem
             key={file.id}
@@ -168,20 +161,25 @@ export default function FileList({
 
         {/* Load More */}
         {nextPageToken && (
-          <button
-            onClick={() => fetchFiles(nextPageToken)}
-            disabled={loadingMore}
-            className="mt-2 w-full cursor-pointer rounded-xl border border-white/[0.06] bg-surface-800/30 py-3 text-sm font-medium text-surface-400 transition-all hover:border-white/[0.12] hover:text-white disabled:opacity-50"
-          >
-            {loadingMore ? (
-              <span className="flex items-center justify-center gap-2">
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary-500/20 border-t-primary-500" />
-                Loading…
-              </span>
-            ) : (
-              "Load More Files"
-            )}
-          </button>
+          <div className="xl:col-span-2 pt-2">
+            <button
+              onClick={() => fetchFiles(nextPageToken)}
+              disabled={loadingMore}
+              className="w-full cursor-pointer rounded-xl border border-outline-variant/10 bg-surface-container-lowest py-4 text-sm font-bold font-headline text-outline transition-all hover:border-primary/20 hover:text-primary hover:shadow-sm disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {loadingMore ? (
+                <>
+                  <span className="material-symbols-outlined animate-spin text-[20px]">refresh</span>
+                  Loading...
+                </>
+              ) : (
+                <>
+                  <span className="material-symbols-outlined text-[20px]">expand_more</span>
+                  Load more assets
+                </>
+              )}
+            </button>
+          </div>
         )}
       </div>
     </div>

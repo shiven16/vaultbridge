@@ -1,121 +1,126 @@
+import { useEffect, useState } from "react";
 import type { TransferItem } from "../hooks/useTransfer";
 
 interface TransferStatusProps {
   transfers: TransferItem[];
 }
 
-function StatusBadge({ status }: { status: TransferItem["status"] }) {
-  const config = {
-    pending: {
-      label: "Pending",
-      className: "bg-surface-700 text-surface-300",
-    },
-    in_progress: {
-      label: "Transferring",
-      className: "bg-primary-500/20 text-primary-300",
-    },
-    success: {
-      label: "Completed",
-      className: "bg-success/20 text-success",
-    },
-    failed: {
-      label: "Failed",
-      className: "bg-danger/20 text-danger",
-    },
-  };
-
-  const { label, className } = config[status];
-
-  return (
-    <span
-      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${className}`}
-    >
-      {status === "in_progress" && (
-        <span className="h-3 w-3 animate-spin rounded-full border-2 border-primary-300/20 border-t-primary-300" />
-      )}
-      {status === "success" && (
-        <svg
-          width="12"
-          height="12"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="3"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <polyline points="20 6 9 17 4 12" />
-        </svg>
-      )}
-      {status === "failed" && (
-        <svg
-          width="12"
-          height="12"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="3"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <line x1="18" y1="6" x2="6" y2="18" />
-          <line x1="6" y1="6" x2="18" y2="18" />
-        </svg>
-      )}
-      {label}
-    </span>
-  );
-}
-
 export default function TransferStatus({ transfers }: TransferStatusProps) {
+  const [pulseLine, setPulseLine] = useState(0);
+
+  // Animate the subtle pulse gradient position
+  useEffect(() => {
+    let animationFrameId: number;
+    let startTimestamp: number;
+
+    const step = (timestamp: number) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = timestamp - startTimestamp;
+      // move gradient position based on time
+      setPulseLine((progress / 30) % 200);
+      animationFrameId = window.requestAnimationFrame(step);
+    };
+    animationFrameId = window.requestAnimationFrame(step);
+
+    return () => {
+      window.cancelAnimationFrame(animationFrameId);
+    };
+  }, []);
+
   if (transfers.length === 0) return null;
 
   const completed = transfers.filter((t) => t.status === "success").length;
   const failed = transfers.filter((t) => t.status === "failed").length;
+  const inProgress = transfers.filter((t) => t.status === "in_progress").length;
   const total = transfers.length;
-  const progress = ((completed + failed) / total) * 100;
+  const overallProgress = ((completed + failed) / total) * 100;
 
   return (
-    <div className="space-y-4">
-      {/* Progress Summary */}
-      <div className="rounded-xl border border-white/[0.06] bg-surface-800/30 p-4">
-        <div className="mb-2 flex items-center justify-between">
-          <p className="text-sm font-medium text-surface-200">
-            Transfer Progress
-          </p>
-          <p className="text-xs text-surface-400">
-            {completed + failed} / {total}
-          </p>
+    <div className="space-y-6">
+      {/* Active Queue Summary */}
+      <div className="bg-surface-container-lowest rounded-xl p-4 transition-all">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="font-headline font-bold text-sm uppercase tracking-widest text-outline">Active Queue</h3>
+          {inProgress > 0 && (
+             <span className="text-[10px] font-headline bg-primary-container text-on-primary-container px-2 py-0.5 rounded-md font-bold">
+               {inProgress} Items Processing
+             </span>
+          )}
         </div>
-        <div className="h-2 overflow-hidden rounded-full bg-surface-700">
-          <div
-            className="h-full rounded-full bg-gradient-to-r from-primary-500 to-primary-400 transition-all duration-500 ease-out"
-            style={{ width: `${progress}%` }}
-          />
+        <div className="flex justify-between items-end mb-2">
+           <span className="text-xs text-on-surface-variant font-headline">Overall Progress</span>
+           <span className="text-xs text-on-surface-variant font-headline font-bold">{Math.round(overallProgress)}%</span>
         </div>
-        {(completed > 0 || failed > 0) && (
-          <div className="mt-2 flex gap-4 text-xs">
-            {completed > 0 && (
-              <span className="text-success">{completed} completed</span>
-            )}
-            {failed > 0 && <span className="text-danger">{failed} failed</span>}
-          </div>
-        )}
+        <div className="h-1.5 w-full bg-surface-container-high rounded-full overflow-hidden">
+          <div className="h-full bg-primary transition-all duration-500 ease-out rounded-full" style={{ width: `${overallProgress}%` }}></div>
+        </div>
       </div>
 
       {/* Transfer Items */}
-      <div className="space-y-2">
-        {transfers.map((transfer) => (
-          <div
-            key={transfer.fileId}
-            className="flex items-center justify-between rounded-lg border border-white/[0.04] bg-surface-900/50 p-3"
-          >
-            <p className="min-w-0 flex-1 truncate pr-3 text-sm text-surface-200">
-              {transfer.fileName}
-            </p>
-            <StatusBadge status={transfer.status} />
-          </div>
-        ))}
+      <div className="space-y-1">
+        {transfers.map((transfer) => {
+          const isPending = transfer.status === "pending";
+          const isInProgress = transfer.status === "in_progress";
+          const isSuccess = transfer.status === "success";
+          const isFailed = transfer.status === "failed";
+
+          return (
+            <div key={transfer.fileId} className="group flex items-center gap-4 p-3 rounded-xl bg-surface-container-lowest border border-transparent hover:border-outline-variant/20 transition-all hover:bg-surface-container-low shadow-sm">
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                  isSuccess ? "bg-success/10 text-success" :
+                  isFailed ? "bg-error/10 text-error" :
+                  isInProgress ? "bg-primary/20 text-primary" :
+                  "bg-surface-container-high text-outline"
+                }`}
+              >
+                <span className={`material-symbols-outlined text-[20px] ${isInProgress ? "animate-spin" : ""}`}>
+                  {isSuccess ? "check_circle" : 
+                   isFailed ? "error" : 
+                   isInProgress ? "sync" : 
+                   "pending"}
+                </span>
+              </div>
+              
+              <div className="flex-1 min-w-0">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="font-headline font-bold text-on-surface text-xs truncate max-w-[150px]" title={transfer.fileName}>
+                    {transfer.fileName}
+                  </span>
+                  
+                  {isSuccess && (
+                     <span className="text-[10px] text-success font-headline font-bold uppercase">Success</span>
+                  )}
+                  {isFailed && (
+                     <span className="text-[10px] text-error font-headline font-bold uppercase">Failed</span>
+                  )}
+                  {isPending && (
+                     <span className="text-[10px] text-outline font-headline font-bold uppercase">Pending</span>
+                  )}
+                  {isInProgress && (
+                     <span className="text-[10px] text-primary font-headline font-bold uppercase">In Progress</span>
+                  )}
+                </div>
+                
+                {isInProgress && (
+                  <div className="h-1 w-full bg-surface-container rounded-full overflow-hidden relative">
+                    <div className="absolute top-0 bottom-0 left-0 bg-primary/20 right-0"></div>
+                    <div 
+                      className="absolute top-0 bottom-0 left-0 bg-primary rounded-full" 
+                      style={{ 
+                         width: "30%", 
+                         transform: `translateX(${pulseLine}%)` 
+                      }}
+                    ></div>
+                  </div>
+                )}
+                
+                {isFailed && (
+                   <p className="text-[10px] text-error font-body truncate">Error during transfer execution</p>
+                )}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

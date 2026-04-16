@@ -9,12 +9,9 @@ import type { DriveFile } from "../api/drive.api";
 export default function Dashboard() {
   const navigate = useNavigate();
   const { sourceAccount, destinationAccount, isFullyConnected } = useAuth();
-  const { transfers, isTransferring, startTransfers, clearTransfers } =
-    useTransfer();
+  const { transfers, isTransferring, startTransfers } = useTransfer();
   const [selectedFiles, setSelectedFiles] = useState<DriveFile[]>([]);
-  const [sourceType, setSourceType] = useState<"drive" | "gcs" | "gmail">(
-    "drive",
-  );
+  const [sourceType, setSourceType] = useState<"drive" | "gcs" | "gmail">("drive");
 
   const handleRemoveFile = useCallback((fileId: string) => {
     setSelectedFiles((prev) => prev.filter((f) => f.id !== fileId));
@@ -31,145 +28,116 @@ export default function Dashboard() {
     }));
 
     startTransfers(filesToTransfer);
-  }, [
-    selectedFiles,
-    sourceAccount,
-    destinationAccount,
-    sourceType,
-    startTransfers,
-  ]);
+  }, [selectedFiles, sourceAccount, destinationAccount, sourceType, startTransfers]);
 
-  // Redirect if not connected (must be after all hooks)
+  // Redirect if not connected
   if (!isFullyConnected || !sourceAccount || !destinationAccount) {
     navigate("/login");
     return null;
   }
 
   return (
-    <div className="flex min-h-screen flex-col pt-16">
-      {/* Account Bar */}
-      <div className="border-b border-white/[0.06] bg-surface-900/40 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-6 py-3">
-          <div className="flex items-center gap-6">
-            {/* Source */}
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-success/10">
-                <svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  className="text-success"
-                >
-                  <polyline points="15 3 21 3 21 9" />
-                  <path d="M21 3l-7 7" />
-                </svg>
-              </div>
-              <div>
-                <p className="text-[10px] font-medium uppercase tracking-wider text-surface-500">
-                  Source
-                </p>
-                <p className="text-xs font-medium text-surface-200">
-                  {sourceAccount.email}
-                </p>
-              </div>
+    <div className="flex h-screen w-full bg-surface text-on-surface overflow-hidden font-body selection:bg-primary-container selection:text-on-primary-container">
+      
+      {/* Left Sidebar (SideNavBar) */}
+      <aside className="hidden md:flex flex-col py-8 px-4 gap-y-2 bg-surface-container-low h-screen w-64 shrink-0 font-headline border-r border-outline-variant/10">
+        <div className="flex flex-col gap-1 mb-8 px-2 cursor-pointer" onClick={() => navigate("/")}>
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-primary text-on-primary font-bold flex items-center justify-center">V</div>
+            <span className="text-lg font-black tracking-tight text-on-surface">VaultBridge</span>
+          </div>
+          <span className="text-[10px] uppercase tracking-widest font-bold text-outline mt-1">The Digital Atelier</span>
+        </div>
+        
+        <button 
+          onClick={() => setSelectedFiles([])}
+          className="mb-6 cursor-pointer flex items-center justify-center gap-2 py-3 px-4 bg-primary text-on-primary rounded-xl font-bold text-sm shadow-md hover:bg-primary-dim transition-all duration-300 active:scale-95"
+        >
+          <span className="material-symbols-outlined text-sm">add</span>
+          New Transfer
+        </button>
+
+        <nav className="flex flex-col gap-1">
+          <button 
+            onClick={() => setSourceType("drive")}
+            className={`flex w-full items-center gap-3 py-3 px-4 rounded-lg shadow-sm font-bold transition-all duration-300 cursor-pointer ${sourceType === "drive" ? "bg-surface-container-highest text-on-surface" : "text-outline hover:bg-surface-container hover:text-on-surface-variant"}`}
+          >
+            <span className="material-symbols-outlined">drive_file_move</span>
+            <span className="text-xs uppercase tracking-widest">Google Drive</span>
+          </button>
+          <button 
+            onClick={() => setSourceType("gmail")}
+            className={`flex w-full items-center gap-3 py-3 px-4 rounded-lg shadow-sm font-bold transition-all duration-300 cursor-pointer ${sourceType === "gmail" ? "bg-surface-container-highest text-on-surface" : "text-outline hover:bg-surface-container hover:text-on-surface-variant"}`}
+          >
+            <span className="material-symbols-outlined">mail_lock</span>
+            <span className="text-xs uppercase tracking-widest">Gmail Attachments</span>
+          </button>
+          <button 
+            onClick={() => setSourceType("gcs")}
+            className={`flex w-full items-center gap-3 py-3 px-4 rounded-lg shadow-sm font-bold transition-all duration-300 cursor-pointer ${sourceType === "gcs" ? "bg-surface-container-highest text-on-surface" : "text-outline hover:bg-surface-container hover:text-on-surface-variant"}`}
+          >
+            <span className="material-symbols-outlined">cloud_done</span>
+            <span className="text-xs uppercase tracking-widest">Cloud Storage</span>
+          </button>
+        </nav>
+
+
+      </aside>
+
+      {/* Central Canvas */}
+      <main className="flex-1 bg-surface h-screen overflow-y-auto flex flex-col">
+        {/* Header (TopNavBar) */}
+        <header className="flex justify-between items-center w-full px-8 h-16 bg-surface-container-lowest shrink-0 border-b border-outline-variant/10">
+          <div className="flex items-center gap-4 flex-1">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-success text-sm">check_circle</span>
+              <span className="text-xs font-headline font-bold text-on-surface-variant">{sourceAccount.email}</span>
             </div>
-
-            {/* Arrow */}
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              className="text-surface-600"
-            >
-              <line x1="5" y1="12" x2="19" y2="12" />
-              <polyline points="12 5 19 12 12 19" />
-            </svg>
-
-            {/* Destination */}
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary-500/10">
-                <svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  className="text-primary-400"
-                >
-                  <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
-                  <polyline points="7 10 12 15 17 10" />
-                  <line x1="12" y1="15" x2="12" y2="3" />
-                </svg>
-              </div>
-              <div>
-                <p className="text-[10px] font-medium uppercase tracking-wider text-surface-500">
-                  Destination
-                </p>
-                <p className="text-xs font-medium text-surface-200">
-                  {destinationAccount.email}
-                </p>
-              </div>
+            <span className="material-symbols-outlined text-outline text-sm">arrow_forward</span>
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-secondary text-sm">check_circle</span>
+              <span className="text-xs font-headline font-bold text-on-surface-variant">{destinationAccount.email}</span>
             </div>
           </div>
-
-          {transfers.length > 0 && !isTransferring && (
-            <button
-              onClick={() => {
-                clearTransfers();
-                setSelectedFiles([]);
-              }}
-              className="cursor-pointer rounded-lg border border-white/10 bg-transparent px-3 py-1.5 text-xs font-medium text-surface-400 transition-colors hover:text-white"
-            >
-              New Transfer
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-0 lg:flex-row">
-        {/* Left Panel - File List */}
-        <div className="flex-1 border-r-0 border-white/[0.06] lg:border-r">
-          <div className="flex items-center justify-between border-b border-white/[0.06] px-5 py-3">
-            <h2 className="text-sm font-semibold text-white">Source Files</h2>
-            <select
-              value={sourceType}
-              onChange={(e) =>
-                setSourceType(e.target.value as "drive" | "gcs" | "gmail")
-              }
-              className="rounded bg-surface-800 px-2 py-1 text-xs text-white border border-white/10 outline-none"
-            >
-              <option value="drive">Google Drive</option>
-              <option value="gmail">Gmail Attachments</option>
-              <option value="gcs">Google Cloud Storage</option>
-            </select>
+          
+          <div className="flex items-center gap-4">
+            <div className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center border border-outline-variant/20 overflow-hidden">
+              <span className="font-headline font-bold text-sm text-on-primary-container">{sourceAccount.email.charAt(0).toUpperCase()}</span>
+            </div>
           </div>
-          <FileList
-            type="source"
-            selectedFiles={selectedFiles}
-            onSelectionChange={setSelectedFiles}
-            sourceType={sourceType}
-          />
-        </div>
+        </header>
 
-        {/* Right Panel - Transfer */}
-        <div className="w-full border-t border-white/[0.06] lg:w-96 lg:border-t-0">
-          <TransferPanel
+        {/* Content Area */}
+        <div className="p-8 flex-1 flex flex-col">
+          <div className="mb-10">
+            <h1 className="text-4xl font-bold font-headline text-on-surface tracking-tight mb-2">
+              {sourceType === "drive" ? "Google Drive" : sourceType === "gmail" ? "Gmail Attachments" : "Cloud Storage"}
+            </h1>
+            <p className="text-lg text-on-surface-variant italic font-body">Your primary creative source repository</p>
+          </div>
+
+          <div className="flex-1 flex flex-col min-h-0 bg-surface-container-lowest rounded-2xl border border-outline-variant/10 p-4 shadow-sm">
+             <FileList
+                type="source"
+                selectedFiles={selectedFiles}
+                onSelectionChange={setSelectedFiles}
+                sourceType={sourceType}
+              />
+          </div>
+        </div>
+      </main>
+
+      {/* Right Panel (NavigationDrawer / TransferPanel) */}
+      <aside className="hidden lg:flex flex-col w-80 bg-surface-container-lowest border-l border-outline-variant/10 shadow-2xl z-40 h-screen relative">
+         <TransferPanel
             selectedFiles={selectedFiles}
             onRemoveFile={handleRemoveFile}
             onStartTransfer={handleStartTransfer}
             isTransferring={isTransferring}
             transfers={transfers}
           />
-        </div>
-      </div>
+      </aside>
+
     </div>
   );
 }

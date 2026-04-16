@@ -29,238 +29,160 @@ export default function Login() {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center px-6">
-      {/* Background */}
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute left-1/3 top-1/3 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary-600/6 blur-[120px]" />
-      </div>
+    <div className="font-body text-on-surface antialiased bg-surface min-h-screen">
+      <main className="flex flex-col items-center justify-center p-6 md:p-12 min-h-screen">
+        {/* Header Brand Anchor */}
+        <header className="mb-12 text-center">
+          <h1 className="font-headline text-3xl font-extrabold tracking-tight text-on-surface mb-2">VaultBridge</h1>
+          <p className="font-headline text-sm uppercase tracking-widest font-bold text-outline">The Digital Atelier</p>
+        </header>
 
-      <div className="relative z-10 w-full max-w-md">
-        <div className="rounded-3xl border border-white/[0.08] bg-surface-900/60 p-8 shadow-2xl backdrop-blur-xl">
-          {/* Header */}
-          <div className="mb-8 text-center">
-            <h1 className="text-2xl font-bold text-white">Connect Accounts</h1>
-            <p className="mt-2 text-sm text-surface-400">
-              Link your source and destination Google accounts
+        {/* Progressive Complexity Flow Container */}
+        <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+          
+          {/* Left: Strategic Context */}
+          <div className="space-y-6 md:sticky md:top-12">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container font-headline text-xs font-bold uppercase tracking-wider">
+              <span className="material-symbols-outlined text-sm">account_tree</span>
+              System Calibration
+            </div>
+            <h2 className="font-headline text-4xl font-bold leading-tight text-primary">
+              Bridge your digital <br/><span className="font-body italic font-normal text-tertiary">ecosystems</span>
+            </h2>
+            <p className="text-xl text-on-surface-variant max-w-sm">
+              VaultBridge orchestrates high-fidelity transfers between your secure repositories. Begin by establishing the terminal points.
             </p>
+            <div className="pt-8 space-y-4">
+              <div className="flex items-center gap-4 group">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center bg-primary text-on-primary font-headline font-bold text-xs">1</div>
+                <span className="font-headline text-sm font-medium text-on-surface group-hover:text-primary transition-colors">Establish Source Origin</span>
+              </div>
+              <div className="flex items-center gap-4 group">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-headline font-bold text-xs ${sourceAccount ? "bg-primary text-on-primary" : "bg-surface-container-highest text-outline"}`}>2</div>
+                <span className={`font-headline text-sm font-medium transition-colors ${sourceAccount ? "text-on-surface group-hover:text-primary" : "text-outline group-hover:text-primary"}`}>Define Destination Target</span>
+              </div>
+              <div className={`flex items-center gap-4 group ${isFullyConnected ? "" : "opacity-50"}`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-headline font-bold text-xs ${isFullyConnected ? "bg-primary text-on-primary" : "bg-surface-container-highest text-outline"}`}>3</div>
+                <span className={`font-headline text-sm font-medium ${isFullyConnected ? "text-on-surface" : "text-outline"}`}>Initialize Workspace</span>
+              </div>
+            </div>
           </div>
 
-          {/* Steps */}
-          <div className="space-y-4">
-            {/* Step 1: Source Account */}
-            <div
-              className={`rounded-2xl border p-5 transition-all duration-300
-                ${
-                  sourceAccount
-                    ? "border-success/30 bg-success/5"
-                    : "border-white/[0.08] bg-surface-800/30"
-                }`}
-            >
-              <div className="flex items-center gap-3">
-                <div
-                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold
-                    ${
-                      sourceAccount
-                        ? "bg-success/20 text-success"
-                        : "bg-primary-500/20 text-primary-400"
-                    }`}
-                >
-                  {sourceAccount ? (
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="3"
-                    >
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                  ) : (
-                    "1"
-                  )}
+          {/* Right: Interactive Canvas (Progressive Steps) */}
+          <div className="space-y-6">
+            
+            {/* Step 1: Source Account Card */}
+            <div className="bg-surface-container-lowest rounded-xl p-8 transition-all duration-300 shadow-sm border border-outline-variant/10">
+              <div className="flex justify-between items-start mb-6">
+                <div className="space-y-1">
+                  <span className="font-headline text-[10px] uppercase tracking-[0.15em] font-extrabold text-outline">Step 01</span>
+                  <h3 className="font-headline text-lg font-bold text-on-surface">Source Account</h3>
                 </div>
-                <div className="flex-1">
-                  <p className="text-sm font-semibold text-white">
-                    Source Account
-                  </p>
-                  <p className="mt-0.5 text-xs text-surface-500">
-                    {sourceAccount
-                      ? sourceAccount.email
-                      : "Account to transfer files from"}
-                  </p>
+                <div className="w-12 h-12 bg-surface-container rounded-lg flex items-center justify-center">
+                  <img alt="Google Logo" className="w-6 h-6" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC8sOR5JLAHoZGLMHB3MRVYvzYmlZoKS2ytklcS4EMNBdkseVPZ4i6Y7SQVE2VzN2pUVb_ODb7dC8dTik9R-SG-HNEhjw-nXqiAmecIKIrevkcpDvSnCZ497pcLVm9THOkb6-2J_F4GXhLHwDKQxbFtb2Gnru5fAfEi_LsM-6wu2BaUVe6AtmqnzgxukdZehTQXYvSvO7xSFu7X2kbzWbkv9W65_aS2O1k7iTGJYYCfH7yIzx2o5I_vIjHZYeOcMVQkNQVVkeHAsw"/>
                 </div>
               </div>
-              {!sourceAccount && (
-                <button
-                  id="connect-source-btn"
-                  onClick={handleConnectSource}
-                  className="mt-4 w-full cursor-pointer rounded-xl border border-white/[0.1] bg-surface-800 px-4 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:border-primary-500/30 hover:bg-surface-700"
-                >
-                  <span className="flex items-center justify-center gap-2">
-                    <svg width="18" height="18" viewBox="0 0 24 24">
-                      <path
-                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
-                        fill="#4285F4"
-                      />
-                      <path
-                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                        fill="#34A853"
-                      />
-                      <path
-                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                        fill="#FBBC05"
-                      />
-                      <path
-                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                        fill="#EA4335"
-                      />
-                    </svg>
+              
+              {sourceAccount ? (
+                <div>
+                  <div className="bg-surface-container-low rounded-lg p-4 flex items-center gap-4 mb-2">
+                    <div className="w-10 h-10 rounded-full border-2 border-primary-container bg-primary-fixed flex items-center justify-center text-on-primary-fixed font-bold">
+                      {sourceAccount.email.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="font-headline text-sm font-bold text-on-surface">Connected Account</p>
+                      <p className="font-headline text-xs text-outline">{sourceAccount.email}</p>
+                    </div>
+                    <div className="ml-auto">
+                      <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                    </div>
+                  </div>
+                  <button onClick={() => handleDisconnect("source")} className="text-xs font-medium text-error hover:underline cursor-pointer mt-2 block ml-2">
+                    Disconnect Source
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <p className="text-on-surface-variant mb-8 font-body leading-relaxed italic text-lg">
+                      Select the origin environment where your assets currently reside.
+                  </p>
+                  <button onClick={handleConnectSource} className="cursor-pointer w-full bg-primary text-on-primary font-headline font-bold text-sm py-4 px-6 rounded-lg flex items-center justify-center gap-3 hover:bg-primary-dim transition-all active:scale-95">
                     Connect Source Account
-                  </span>
-                </button>
-              )}
-              {sourceAccount && (
-                <button
-                  onClick={() => handleDisconnect("source")}
-                  className="mt-4 text-xs font-medium text-danger hover:underline cursor-pointer"
-                >
-                  Disconnect Source Account
-                </button>
+                  </button>
+                </>
               )}
             </div>
 
-            {/* Arrow */}
-            <div className="flex justify-center">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full border border-white/[0.06] bg-surface-800/50">
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  className="text-surface-500"
-                >
-                  <line x1="12" y1="5" x2="12" y2="19" />
-                  <polyline points="19 12 12 19 5 12" />
-                </svg>
-              </div>
-            </div>
-
-            {/* Step 2: Destination Account */}
-            <div
-              className={`rounded-2xl border p-5 transition-all duration-300
-                ${
-                  destinationAccount
-                    ? "border-success/30 bg-success/5"
-                    : sourceAccount
-                      ? "border-white/[0.08] bg-surface-800/30"
-                      : "border-white/[0.04] bg-surface-900/30 opacity-50"
-                }`}
-            >
-              <div className="flex items-center gap-3">
-                <div
-                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold
-                    ${
-                      destinationAccount
-                        ? "bg-success/20 text-success"
-                        : "bg-surface-700 text-surface-400"
-                    }`}
-                >
-                  {destinationAccount ? (
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="3"
-                    >
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                  ) : (
-                    "2"
-                  )}
+            {/* Step 2: Destination Account Card */}
+            <div className={`bg-surface-container-lowest rounded-xl p-8 border-2 transition-all duration-300 ${!sourceAccount ? "border-dashed border-surface-container-high opacity-70" : "border-solid border-outline-variant/10 shadow-sm"}`}>
+              <div className="flex justify-between items-start mb-6">
+                <div className="space-y-1">
+                  <span className={`font-headline text-[10px] uppercase tracking-[0.15em] font-extrabold ${sourceAccount ? "text-primary" : "text-outline"}`}>Step 02</span>
+                  <h3 className="font-headline text-lg font-bold text-on-surface">Destination Account</h3>
                 </div>
-                <div className="flex-1">
-                  <p className="text-sm font-semibold text-white">
-                    Destination Account
-                  </p>
-                  <p className="mt-0.5 text-xs text-surface-500">
-                    {destinationAccount
-                      ? destinationAccount.email
-                      : "Account to transfer files to"}
-                  </p>
+                <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${sourceAccount ? "bg-surface-container" : "bg-surface-container-high opacity-40"}`}>
+                  <img alt="Google Logo" className={`w-6 h-6 ${!sourceAccount ? "grayscale" : ""}`} src="https://lh3.googleusercontent.com/aida-public/AB6AXuCV7lxNk0YVJYlitSFuQlAa1jB96h5dpGIZwkVcga3g2x7wIL9MMtSWCKKSRo1FcNqcxZ5xuo51Pw7MgSAu1oMW0fzJxXIPK2U71WNYNOeSFuMARlskbO2xdmB5zNjS6zgN5AyWctNTD2zRGrSWDaP24_nDEHvGpChmuk7EV3ZMlW3X3uAnPrOWHae6eJQEqPljQE87FXRsiibveBrcWOK5d09pDqZgaFuR8gxbuCJTBlULwgt3Xo_6Tc_S86YNpWZP9Qp6NiMnww"/>
                 </div>
               </div>
-              {sourceAccount && !destinationAccount && (
-                <button
-                  id="connect-destination-btn"
-                  onClick={handleConnectDestination}
-                  className="mt-4 w-full cursor-pointer rounded-xl border border-white/[0.1] bg-surface-800 px-4 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:border-primary-500/30 hover:bg-surface-700"
-                >
-                  <span className="flex items-center justify-center gap-2">
-                    <svg width="18" height="18" viewBox="0 0 24 24">
-                      <path
-                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
-                        fill="#4285F4"
-                      />
-                      <path
-                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                        fill="#34A853"
-                      />
-                      <path
-                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                        fill="#FBBC05"
-                      />
-                      <path
-                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                        fill="#EA4335"
-                      />
-                    </svg>
+              
+              {destinationAccount ? (
+                <div>
+                  <div className="bg-surface-container-low rounded-lg p-4 flex items-center gap-4 mb-2">
+                    <div className="w-10 h-10 rounded-full border-2 border-secondary-container bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed font-bold">
+                      {destinationAccount.email.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="font-headline text-sm font-bold text-on-surface">Connected Target</p>
+                      <p className="font-headline text-xs text-outline">{destinationAccount.email}</p>
+                    </div>
+                    <div className="ml-auto">
+                      <span className="material-symbols-outlined text-secondary" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                    </div>
+                  </div>
+                  <button onClick={() => handleDisconnect("destination")} className="text-xs font-medium text-error hover:underline cursor-pointer mt-2 block ml-2">
+                    Disconnect Target
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <p className="text-on-surface-variant mb-8 font-body leading-relaxed italic text-lg">
+                      Select the target environment where your assets will be synchronized.
+                  </p>
+                  <button 
+                    onClick={sourceAccount ? handleConnectDestination : undefined} 
+                    disabled={!sourceAccount}
+                    className={`w-full font-headline font-bold text-sm py-4 px-6 rounded-lg flex items-center justify-center gap-3 transition-all ${sourceAccount ? "bg-primary text-on-primary hover:bg-primary-dim active:scale-95 cursor-pointer" : "bg-surface-container text-on-surface-variant cursor-not-allowed"}`}
+                  >
                     Connect Destination Account
-                  </span>
-                </button>
+                  </button>
+                </>
               )}
-              {destinationAccount && (
-                <button
-                  onClick={() => handleDisconnect("destination")}
-                  className="mt-4 text-xs font-medium text-danger hover:underline cursor-pointer"
-                >
-                  Disconnect Destination Account
-                </button>
-              )}
+            </div>
+
+            {/* Step 3: Global Action */}
+            <div className="pt-6">
+              <button 
+                onClick={isFullyConnected ? () => navigate("/dashboard") : undefined}
+                className={`w-full font-headline font-bold text-sm py-5 px-6 rounded-xl flex items-center justify-between group transition-all ${isFullyConnected ? "bg-primary text-on-primary hover:brightness-110 active:scale-95 cursor-pointer" : "bg-surface-container-highest text-on-surface cursor-not-allowed opacity-60"}`}
+              >
+                <span className="flex items-center gap-3">
+                  <span className="material-symbols-outlined">rocket_launch</span>
+                  Continue to Workspace
+                </span>
+                <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+              </button>
+              <p className="text-center mt-4 font-headline text-[10px] uppercase tracking-widest text-outline font-bold">
+                {isFullyConnected ? "All systems nominal. Ready for workspace initialization." : "Awaiting connection of both accounts"}
+              </p>
             </div>
           </div>
-
-          {/* Continue Button */}
-          {isFullyConnected && (
-            <button
-              id="continue-dashboard-btn"
-              onClick={() => navigate("/dashboard")}
-              className="mt-6 w-full cursor-pointer rounded-xl border-none bg-gradient-to-r from-primary-600 to-primary-500 px-4 py-3.5 text-sm font-semibold text-white shadow-lg shadow-primary-500/20 transition-all duration-200 hover:shadow-xl hover:shadow-primary-500/30 hover:brightness-110"
-            >
-              <span className="flex items-center justify-center gap-2">
-                Continue to Dashboard
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                  <polyline points="12 5 19 12 12 19" />
-                </svg>
-              </span>
-            </button>
-          )}
         </div>
-      </div>
+
+        {/* Decorative Architectural Element */}
+        <div className="fixed bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/10 to-transparent"></div>
+
+
+      </main>
     </div>
   );
 }
