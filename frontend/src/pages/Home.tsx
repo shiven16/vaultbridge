@@ -41,7 +41,8 @@ export default function Home() {
             </h1>
             <p className="font-body text-xl md:text-2xl text-on-surface-variant max-w-2xl mx-auto leading-relaxed">
               The bridge between your Google Drive, Gmail, and Cloud Storage. A
-              quiet, authoritative workspace for high-cognition file orchestration.
+              quiet, authoritative workspace for high-cognition file
+              orchestration.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-6">
               <button
@@ -170,8 +171,8 @@ export default function Home() {
                   Smart Archive
                 </h4>
                 <p className="font-body text-lg text-on-surface-variant mb-8">
-                  Intelligent categorization of your digital assets using archival
-                  standards.
+                  Intelligent categorization of your digital assets using
+                  archival standards.
                 </p>
                 <img
                   className="w-full h-40 object-cover rounded-xl"
@@ -240,9 +241,9 @@ export default function Home() {
                   Digital Atelier
                 </h2>
                 <p className="font-body text-xl text-on-surface-variant">
-                  Bridge the gap between high-performance Cloud Storage and daily
-                  collaboration tools. VaultBridge provides a tactile interface
-                  for managing massive datasets across your ecosystem.
+                  Bridge the gap between high-performance Cloud Storage and
+                  daily collaboration tools. VaultBridge provides a tactile
+                  interface for managing massive datasets across your ecosystem.
                 </p>
                 <div className="pt-4">
                   <a
@@ -275,8 +276,8 @@ export default function Home() {
                 Ready to bridge the gap?
               </h2>
               <p className="font-body text-xl text-on-surface-variant mb-12 max-w-xl mx-auto">
-                Join the workspace revolution. Experience a file management system
-                designed for the way you actually think.
+                Join the workspace revolution. Experience a file management
+                system designed for the way you actually think.
               </p>
               <button
                 onClick={() => navigate("/login")}

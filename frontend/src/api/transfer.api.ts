@@ -5,6 +5,7 @@ export interface TransferRequest {
   fileName: string;
   mimeType?: string;
   sourceType: "drive" | "gcs" | "gmail";
+  transferMode: "copy" | "move";
 }
 
 export interface TransferResponse {

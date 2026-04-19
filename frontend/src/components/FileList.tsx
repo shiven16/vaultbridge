@@ -83,8 +83,12 @@ export default function FileList({
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-20 flex-1">
-        <span className="material-symbols-outlined text-4xl text-primary animate-spin">refresh</span>
-        <p className="mt-4 text-sm font-headline text-outline">Synchronizing data...</p>
+        <span className="material-symbols-outlined text-4xl text-primary animate-spin">
+          refresh
+        </span>
+        <p className="mt-4 text-sm font-headline text-outline">
+          Synchronizing data...
+        </p>
       </div>
     );
   }
@@ -93,9 +97,13 @@ export default function FileList({
     return (
       <div className="flex flex-col items-center justify-center py-20 flex-1">
         <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-error-container">
-          <span className="material-symbols-outlined text-on-error-container">error</span>
+          <span className="material-symbols-outlined text-on-error-container">
+            error
+          </span>
         </div>
-        <p className="mt-3 font-headline text-sm text-error font-bold">{error}</p>
+        <p className="mt-3 font-headline text-sm text-error font-bold">
+          {error}
+        </p>
         <button
           onClick={() => fetchFiles()}
           className="mt-4 cursor-pointer rounded-lg bg-surface-container-highest px-6 py-2 text-sm font-bold font-headline text-on-surface transition-all hover:bg-surface-variant active:scale-95 shadow-sm"
@@ -110,9 +118,13 @@ export default function FileList({
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center flex-1">
         <div className="flex h-16 w-16 mb-4 items-center justify-center rounded-xl bg-surface-container">
-          <span className="material-symbols-outlined text-3xl text-outline">search_off</span>
+          <span className="material-symbols-outlined text-3xl text-outline">
+            search_off
+          </span>
         </div>
-        <p className="font-headline font-bold text-on-surface text-lg">No assets found</p>
+        <p className="font-headline font-bold text-on-surface text-lg">
+          No assets found
+        </p>
         <p className="mt-1 text-sm text-outline font-body italic">
           Try adjusting your source or checking your connection.
         </p>
@@ -125,7 +137,9 @@ export default function FileList({
       {/* Header Row */}
       <div className="flex items-center justify-between px-2 mb-4">
         <div className="flex items-center gap-3">
-          <span className="text-[10px] uppercase tracking-widest font-bold text-outline">Select Assets</span>
+          <span className="text-[10px] uppercase tracking-widest font-bold text-outline">
+            Select Assets
+          </span>
           <span className="font-headline text-xs text-primary font-bold bg-primary/10 px-2 py-0.5 rounded-md">
             {selectedFiles.length} selected
           </span>
@@ -169,12 +183,16 @@ export default function FileList({
             >
               {loadingMore ? (
                 <>
-                  <span className="material-symbols-outlined animate-spin text-[20px]">refresh</span>
+                  <span className="material-symbols-outlined animate-spin text-[20px]">
+                    refresh
+                  </span>
                   Loading...
                 </>
               ) : (
                 <>
-                  <span className="material-symbols-outlined text-[20px]">expand_more</span>
+                  <span className="material-symbols-outlined text-[20px]">
+                    expand_more
+                  </span>
                   Load more assets
                 </>
               )}

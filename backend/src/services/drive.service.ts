@@ -100,3 +100,13 @@ export async function uploadFileStream(
 
   return uploadedFileId;
 }
+
+export async function deleteFile(accessToken: string, fileId: string): Promise<void> {
+  const drive = createAuthenticatedDrive(accessToken);
+
+  logger.info(`Deleting source file: ${fileId}`);
+
+  await withRetry(() => drive.files.delete({ fileId }), { maxRetries: 3 });
+
+  logger.info(`Source file ${fileId} deleted successfully`);
+}

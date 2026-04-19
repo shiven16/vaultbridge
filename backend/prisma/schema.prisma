@@ -20,6 +20,11 @@ enum TransferSource {
   gmail
 }
 
+enum TransferMode {
+  copy
+  move
+}
+
 model User {
   id        String   @id @default(uuid())
   googleId  String   @unique
@@ -46,6 +51,7 @@ model Transfer {
   sourceFileId String
   fileName     String
   sourceType   TransferSource @default(drive)
+  transferMode TransferMode   @default(copy)
   status       TransferStatus @default(pending)
   error        String?
   retryCount   Int            @default(0)

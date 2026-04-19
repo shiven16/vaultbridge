@@ -14,6 +14,7 @@ export interface TransferInput {
   fileName: string;
   mimeType?: string;
   sourceType: 'drive' | 'gcs' | 'gmail';
+  transferMode?: 'copy' | 'move';
 }
 
 export interface BatchTransferInput {
@@ -24,6 +25,7 @@ export interface BatchTransferInput {
     mimeType?: string;
   }>;
   sourceType: 'drive' | 'gcs' | 'gmail';
+  transferMode?: 'copy' | 'move';
 }
 
 export async function processQueue(userId: string) {
@@ -63,6 +65,7 @@ export async function processQueue(userId: string) {
           transfer.fileName,
           'application/octet-stream',
           transfer.sourceType as 'drive' | 'gcs' | 'gmail',
+          transfer.transferMode as 'copy' | 'move',
         );
       })
       .catch((error) => {
@@ -88,6 +91,7 @@ export async function initiateTransfer(input: TransferInput): Promise<string> {
       sourceFileId: input.fileId,
       fileName: input.fileName,
       sourceType: input.sourceType,
+      transferMode: input.transferMode ?? 'copy',
       status: 'pending',
     },
   });
@@ -109,6 +113,7 @@ export async function initiateBatchTransfer(input: BatchTransferInput): Promise<
         sourceFileId: file.fileId,
         fileName: file.fileName,
         sourceType: input.sourceType,
+        transferMode: input.transferMode ?? 'copy',
         status: 'pending',
       },
     });
@@ -130,6 +135,7 @@ async function executeTransfer(
   fileName: string,
   mimeType: string,
   sourceType: 'drive' | 'gcs' | 'gmail',
+  transferMode: 'copy' | 'move' = 'copy',
 ): Promise<void> {
   try {
     logger.info(`Executing transfer ${transferId}: ${fileName} from ${sourceType}`);
@@ -152,7 +158,32 @@ async function executeTransfer(
       mimeType,
     );
 
-    // Step 3: Mark transfer as successful
+    // Step 3: If mode is 'move', delete the source file
+    if (transferMode === 'move') {
+      try {
+        logger.info(`Move mode: deleting source file ${fileId} from ${sourceType}`);
+        if (sourceType === 'drive') {
+          await driveService.deleteFile(sourceAccessToken, fileId);
+        } else {
+          logger.warn(`Delete not implemented for sourceType: ${sourceType}, skipping.`);
+        }
+      } catch (deleteError) {
+        const deleteMsg = deleteError instanceof Error ? deleteError.message : String(deleteError);
+        logger.error(`Transfer ${transferId} succeeded but source deletion failed: ${deleteMsg}`);
+        // Mark as success but note the deletion failure
+        await prisma.transfer.update({
+          where: { id: transferId },
+          data: {
+            status: 'success',
+            error: `Copied successfully but failed to delete source: ${deleteMsg}`,
+            finishedAt: new Date(),
+          },
+        });
+        return;
+      }
+    }
+
+    // Step 4: Mark transfer as successful
     await prisma.transfer.update({
       where: { id: transferId },
       data: {
@@ -161,7 +192,9 @@ async function executeTransfer(
       },
     });
 
-    logger.info(`Transfer ${transferId} completed. Uploaded file ID: ${uploadedFileId}`);
+    logger.info(
+      `Transfer ${transferId} completed (${transferMode}). Uploaded file ID: ${uploadedFileId}`,
+    );
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     logger.error(`Transfer ${transferId} failed: ${errorMessage}`);

@@ -33,6 +33,7 @@ export function useTransfer() {
         fileName: string;
         mimeType: string;
         sourceType: "drive" | "gcs" | "gmail";
+        transferMode: "copy" | "move";
       }[],
     ) => {
       setIsTransferring(true);
@@ -55,6 +56,7 @@ export function useTransfer() {
             fileName: file.fileName,
             mimeType: file.mimeType,
             sourceType: file.sourceType,
+            transferMode: file.transferMode,
           };
 
           const response = await createTransfer(req);
