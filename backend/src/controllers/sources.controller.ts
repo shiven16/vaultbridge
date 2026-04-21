@@ -28,7 +28,12 @@ export async function listFiles(
 
     let result;
     if (query.sourceType === 'drive') {
-      result = await driveService.listFiles(accessToken, query.pageToken, query.pageSize, query.orderBy);
+      result = await driveService.listFiles(
+        accessToken,
+        query.pageToken,
+        query.pageSize,
+        query.orderBy,
+      );
     } else if (query.sourceType === 'gcs') {
       result = await gcsService.listGCSFiles(accessToken, query.pageToken, query.pageSize);
     } else if (query.sourceType === 'gmail') {

@@ -24,7 +24,12 @@ export async function listFiles(
     const query = listFilesSchema.parse(req.query);
     const accessToken = await googleService.getValidTokenForUser(req.userId, query.type);
 
-    const result = await driveService.listFiles(accessToken, query.pageToken, query.pageSize, query.orderBy);
+    const result = await driveService.listFiles(
+      accessToken,
+      query.pageToken,
+      query.pageSize,
+      query.orderBy,
+    );
 
     res.json(result);
   } catch (error) {
@@ -41,7 +46,9 @@ export async function getStorageQuota(
     if (!req.userId) {
       throw new AppError('Unauthorized', 401);
     }
-    const typeObj = z.object({ type: z.enum(['source', 'destination']).default('source') }).parse(req.query);
+    const typeObj = z
+      .object({ type: z.enum(['source', 'destination']).default('source') })
+      .parse(req.query);
     const accessToken = await googleService.getValidTokenForUser(req.userId, typeObj.type);
 
     const result = await driveService.getStorageQuota(accessToken);

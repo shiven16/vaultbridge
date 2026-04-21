@@ -122,10 +122,9 @@ export async function deleteFile(accessToken: string, fileId: string): Promise<v
 export async function getStorageQuota(accessToken: string): Promise<StorageQuota> {
   const drive = createAuthenticatedDrive(accessToken);
 
-  const response = await withRetry(
-    () => drive.about.get({ fields: 'storageQuota' }),
-    { maxRetries: 3 },
-  );
+  const response = await withRetry(() => drive.about.get({ fields: 'storageQuota' }), {
+    maxRetries: 3,
+  });
 
   return {
     limit: response.data.storageQuota?.limit ?? '0',

@@ -76,7 +76,7 @@ export default function FileList({
         setLoadingMore(false);
       }
     },
-    [type, sourceType],
+    [type, sourceType, sortOrder],
   );
 
   // Fetch when sourceType changes

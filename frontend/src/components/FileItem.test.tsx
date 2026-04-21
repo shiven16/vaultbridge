@@ -30,9 +30,7 @@ describe("FileItem Component", () => {
   });
 
   it("shows as checked when selected", () => {
-    render(
-      <FileItem file={mockFile} isSelected={true} onToggle={() => {}} />,
-    );
+    render(<FileItem file={mockFile} isSelected={true} onToggle={() => {}} />);
 
     const checkbox = screen.getByRole("checkbox");
     expect(checkbox).toBeChecked();

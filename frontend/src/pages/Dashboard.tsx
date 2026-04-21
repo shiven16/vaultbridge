@@ -50,31 +50,34 @@ export default function Dashboard() {
 
   // Fetch storage quota when source is drive
   useEffect(() => {
-    if (sourceType !== "drive") {
-      setStorageInfo(null);
-      return;
-    }
     let cancelled = false;
     setStorageLoading(true);
-    getStorageQuota("source")
-      .then((quota) => {
+
+    const fetchQuota = async () => {
+      if (sourceType !== "drive") {
+        if (!cancelled) {
+          setStorageInfo(null);
+          setStorageLoading(false);
+        }
+        return;
+      }
+      try {
+        const quota = await getStorageQuota("source");
         if (cancelled) return;
         const limitBytes = parseInt(quota.limit, 10) || 0;
         const usedBytes = parseInt(quota.usage, 10) || 0;
         const availableBytes = Math.max(limitBytes - usedBytes, 0);
-        const usedPercent = limitBytes > 0 ? Math.round((usedBytes / limitBytes) * 100) : 0;
-        setStorageInfo({
-          limitBytes,
-          availableBytes,
-          usedPercent,
-        });
-      })
-      .catch(() => {
+        const usedPercent =
+          limitBytes > 0 ? Math.round((usedBytes / limitBytes) * 100) : 0;
+        setStorageInfo({ limitBytes, availableBytes, usedPercent });
+      } catch {
         if (!cancelled) setStorageInfo(null);
-      })
-      .finally(() => {
+      } finally {
         if (!cancelled) setStorageLoading(false);
-      });
+      }
+    };
+
+    fetchQuota();
     return () => {
       cancelled = true;
     };
@@ -190,7 +193,9 @@ export default function Dashboard() {
               <div className="w-full bg-surface-container-high rounded-full h-1.5 mb-2">
                 <div
                   className={`h-1.5 rounded-full transition-all duration-500 ${storageInfo.usedPercent > 85 ? "bg-error" : storageInfo.usedPercent > 70 ? "bg-warning" : "bg-primary"}`}
-                  style={{ width: `${Math.min(storageInfo.usedPercent, 100)}%` }}
+                  style={{
+                    width: `${Math.min(storageInfo.usedPercent, 100)}%`,
+                  }}
                 />
               </div>
               <p className="text-[11px] text-on-surface-variant font-headline">
@@ -202,7 +207,8 @@ export default function Dashboard() {
                       <span className="font-bold text-on-surface">
                         {toUnit(storageInfo.availableBytes, unitIdx)} {unit}
                       </span>{" "}
-                      available of {toUnit(storageInfo.limitBytes, unitIdx)} {unit}
+                      available of {toUnit(storageInfo.limitBytes, unitIdx)}{" "}
+                      {unit}
                     </>
                   );
                 })()}
@@ -274,7 +280,10 @@ export default function Dashboard() {
                     // Use the unit of the total (limit) for both values
                     const unitIdx = getBestUnitIndex(storageInfo.limitBytes);
                     const unit = STORAGE_UNITS[unitIdx];
-                    const availableStr = toUnit(storageInfo.availableBytes, unitIdx);
+                    const availableStr = toUnit(
+                      storageInfo.availableBytes,
+                      unitIdx,
+                    );
                     const totalStr = toUnit(storageInfo.limitBytes, unitIdx);
                     return (
                       <>
@@ -288,14 +297,20 @@ export default function Dashboard() {
                         >
                           <span
                             className={`material-symbols-outlined text-[16px] ${
-                              storageInfo.usedPercent > 85 ? "text-error" : "text-primary"
+                              storageInfo.usedPercent > 85
+                                ? "text-error"
+                                : "text-primary"
                             }`}
                           >
-                            {storageInfo.usedPercent > 85 ? "warning" : "cloud_queue"}
+                            {storageInfo.usedPercent > 85
+                              ? "warning"
+                              : "cloud_queue"}
                           </span>
                           <span
                             className={`text-xs font-bold uppercase tracking-widest font-headline ${
-                              storageInfo.usedPercent > 85 ? "text-error" : "text-primary"
+                              storageInfo.usedPercent > 85
+                                ? "text-error"
+                                : "text-primary"
                             }`}
                           >
                             {availableStr} {unit} available of {totalStr} {unit}
