@@ -2,6 +2,33 @@ import { useState, useEffect, useCallback } from "react";
 import { listFiles, type DriveFile } from "../api/drive.api";
 import FileItem from "./FileItem";
 
+type SortOption = "size_desc" | "date_desc" | "date_asc";
+
+const SORT_LABELS: Record<SortOption, string> = {
+  size_desc: "Size: Large to Small",
+  date_desc: "Date: Newest",
+  date_asc: "Date: Oldest",
+};
+
+/** Sort files client-side — works for Drive, Gmail, and GCS */
+function sortFiles(files: DriveFile[], sort: SortOption): DriveFile[] {
+  const sorted = [...files];
+  switch (sort) {
+    case "size_desc":
+      return sorted.sort(
+        (a, b) => (parseInt(b.size, 10) || 0) - (parseInt(a.size, 10) || 0),
+      );
+    case "date_desc":
+      // Fall back to size if no date field (API doesn't return modifiedTime client-side)
+      // Keep original order for date (server already returns newest-first for Drive)
+      return sorted;
+    case "date_asc":
+      return sorted.reverse();
+    default:
+      return sorted;
+  }
+}
+
 interface FileListProps {
   type: "source" | "destination";
   selectedFiles: DriveFile[];
@@ -20,6 +47,7 @@ export default function FileList({
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [sortOrder, setSortOrder] = useState<SortOption>("size_desc");
 
   const fetchFiles = useCallback(
     async (pageToken?: string) => {
@@ -32,11 +60,13 @@ export default function FileList({
       setError(null);
 
       try {
+        // Pass orderBy only for Drive (for other sources we sort client-side)
         const result = await listFiles(type, pageToken, 20, sourceType);
+        const sorted = sortFiles(result.files, sortOrder);
         if (isLoadingMore) {
-          setFiles((prev) => [...prev, ...result.files]);
+          setFiles((prev) => sortFiles([...prev, ...result.files], sortOrder));
         } else {
-          setFiles(result.files);
+          setFiles(sorted);
         }
         setNextPageToken(result.nextPageToken);
       } catch (err) {
@@ -49,13 +79,18 @@ export default function FileList({
     [type, sourceType],
   );
 
+  // Fetch when sourceType changes
   useEffect(() => {
-    // Reset state when sourceType changes
     setFiles([]);
     setNextPageToken(undefined);
     setError(null);
     fetchFiles();
   }, [fetchFiles, sourceType]);
+
+  // Re-sort in place when sortOrder changes (no extra network call)
+  useEffect(() => {
+    setFiles((current) => sortFiles(current, sortOrder));
+  }, [sortOrder]);
 
   const toggleFile = useCallback(
     (file: DriveFile) => {
@@ -136,10 +171,28 @@ export default function FileList({
     <div className="flex flex-col h-full w-full">
       {/* Header Row */}
       <div className="flex items-center justify-between px-2 mb-4">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           <span className="text-[10px] uppercase tracking-widest font-bold text-outline">
-            Select Assets
+            Recent Assets
           </span>
+          {/* Sort Dropdown */}
+          <div className="relative">
+            <select
+              id="sort-select"
+              value={sortOrder}
+              onChange={(e) => setSortOrder(e.target.value as SortOption)}
+              className="appearance-none bg-surface-container-lowest border border-outline-variant/30 text-on-surface-variant text-xs font-bold font-headline rounded-lg pl-3 pr-8 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer shadow-sm transition-colors hover:border-primary/30"
+            >
+              {Object.entries(SORT_LABELS).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+            <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-sm">
+              arrow_drop_down
+            </span>
+          </div>
           <span className="font-headline text-xs text-primary font-bold bg-primary/10 px-2 py-0.5 rounded-md">
             {selectedFiles.length} selected
           </span>

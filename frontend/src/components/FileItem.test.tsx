@@ -29,13 +29,12 @@ describe("FileItem Component", () => {
     expect(onToggleMock).toHaveBeenCalledWith(mockFile);
   });
 
-  it("shows checkmark when selected", () => {
-    const { container } = render(
+  it("shows as checked when selected", () => {
+    render(
       <FileItem file={mockFile} isSelected={true} onToggle={() => {}} />,
     );
 
-    // Check if the svg checkmark is in the document by checking its parent
-    const svgIcon = container.querySelector("svg");
-    expect(svgIcon).toBeInTheDocument();
+    const checkbox = screen.getByRole("checkbox");
+    expect(checkbox).toBeChecked();
   });
 });

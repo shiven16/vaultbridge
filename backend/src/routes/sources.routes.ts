@@ -5,5 +5,6 @@ import { authMiddleware } from '../middlewares/auth.middleware.js';
 const router = Router();
 
 router.get('/files', authMiddleware, sourcesController.listFiles);
+router.get('/quota', authMiddleware, sourcesController.getStorageQuota);
 
 export default router;

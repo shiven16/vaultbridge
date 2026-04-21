@@ -22,10 +22,18 @@ function createAuthenticatedDrive(accessToken: string) {
   return google.drive({ version: 'v3', auth: oauth2Client });
 }
 
+export interface StorageQuota {
+  limit: string;
+  usage: string;
+  usageInDrive: string;
+  usageInDriveTrash: string;
+}
+
 export async function listFiles(
   accessToken: string,
   pageToken?: string,
   pageSize = 20,
+  orderBy = 'quotaBytesUsed desc',
 ): Promise<DriveFileListResult> {
   const drive = createAuthenticatedDrive(accessToken);
 
@@ -36,7 +44,7 @@ export async function listFiles(
         pageToken: pageToken ?? undefined,
         fields: 'nextPageToken, files(id, name, mimeType, size)',
         q: "trashed = false and mimeType != 'application/vnd.google-apps.folder'",
-        orderBy: 'modifiedTime desc',
+        orderBy,
       }),
     { maxRetries: 3 },
   );
@@ -109,4 +117,20 @@ export async function deleteFile(accessToken: string, fileId: string): Promise<v
   await withRetry(() => drive.files.delete({ fileId }), { maxRetries: 3 });
 
   logger.info(`Source file ${fileId} deleted successfully`);
+}
+
+export async function getStorageQuota(accessToken: string): Promise<StorageQuota> {
+  const drive = createAuthenticatedDrive(accessToken);
+
+  const response = await withRetry(
+    () => drive.about.get({ fields: 'storageQuota' }),
+    { maxRetries: 3 },
+  );
+
+  return {
+    limit: response.data.storageQuota?.limit ?? '0',
+    usage: response.data.storageQuota?.usage ?? '0',
+    usageInDrive: response.data.storageQuota?.usageInDrive ?? '0',
+    usageInDriveTrash: response.data.storageQuota?.usageInDriveTrash ?? '0',
+  };
 }

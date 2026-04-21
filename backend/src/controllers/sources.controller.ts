@@ -11,6 +11,7 @@ const listFilesSchema = z.object({
   sourceType: z.enum(['drive', 'gcs', 'gmail']),
   pageToken: z.string().optional(),
   pageSize: z.coerce.number().min(1).max(100).optional(),
+  orderBy: z.string().optional(),
 });
 
 export async function listFiles(
@@ -27,7 +28,7 @@ export async function listFiles(
 
     let result;
     if (query.sourceType === 'drive') {
-      result = await driveService.listFiles(accessToken, query.pageToken, query.pageSize);
+      result = await driveService.listFiles(accessToken, query.pageToken, query.pageSize, query.orderBy);
     } else if (query.sourceType === 'gcs') {
       result = await gcsService.listGCSFiles(accessToken, query.pageToken, query.pageSize);
     } else if (query.sourceType === 'gmail') {
@@ -38,6 +39,23 @@ export async function listFiles(
       );
     }
 
+    res.json(result);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getStorageQuota(
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    if (!req.userId) {
+      throw new AppError('Unauthorized', 401);
+    }
+    const accessToken = await googleService.getValidTokenForUser(req.userId, 'source');
+    const result = await driveService.getStorageQuota(accessToken);
     res.json(result);
   } catch (error) {
     next(error);
