@@ -129,25 +129,24 @@ export default function Dashboard() {
   return (
     <div className="flex h-screen w-full bg-surface text-on-surface overflow-hidden font-body selection:bg-primary-container selection:text-on-primary-container">
       {/* Left Sidebar */}
-      <aside className="hidden md:flex flex-col py-8 px-4 gap-y-2 bg-surface-container-low h-screen w-64 shrink-0 font-headline border-r border-outline-variant/10">
+      <aside className="hidden md:flex flex-col pb-8 gap-y-2 bg-surface-container-low h-screen w-64 shrink-0 font-headline border-r border-outline-variant/10">
         <div
-          className="flex flex-col gap-1 mb-8 px-2 cursor-pointer"
+          className="flex flex-col justify-center h-16 px-6 mb-6 cursor-pointer shrink-0"
           onClick={() => navigate("/")}
         >
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-primary text-on-primary font-bold flex items-center justify-center">
-              V
-            </div>
+          <div className="flex items-center gap-1.5">
+            <img
+              src="/logo.png"
+              alt="VaultBridge Logo"
+              className="h-8 w-auto object-contain drop-shadow-sm"
+            />
             <span className="text-lg font-black tracking-tight text-on-surface">
               VaultBridge
             </span>
           </div>
-          <span className="text-[10px] uppercase tracking-widest font-bold text-outline mt-1">
-            The Digital Atelier
-          </span>
         </div>
 
-        <nav className="flex flex-col gap-1">
+        <nav className="flex flex-col gap-1 px-4">
           <button
             onClick={() => setSourceType("drive")}
             className={`flex w-full items-center gap-3 py-3 px-4 rounded-lg shadow-sm font-bold transition-all duration-300 cursor-pointer ${sourceType === "drive" ? "bg-surface-container-highest text-on-surface" : "text-outline hover:bg-surface-container hover:text-on-surface-variant"}`}
@@ -179,7 +178,7 @@ export default function Dashboard() {
 
         {/* Storage capacity in sidebar bottom */}
         {storageInfo && (
-          <div className="mt-auto pt-4 border-t border-outline-variant/10">
+          <div className="mt-auto pt-4 border-t border-outline-variant/10 px-4">
             <div className="px-2 py-3">
               <div className="flex items-center gap-2 mb-2">
                 <span className="material-symbols-outlined text-primary text-[18px]">
@@ -224,9 +223,19 @@ export default function Dashboard() {
         <header className="flex justify-between items-center w-full px-8 h-16 bg-surface-container-lowest shrink-0 border-b border-outline-variant/10">
           <div className="flex items-center gap-4 flex-1">
             <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-success text-sm">
-                check_circle
-              </span>
+              {sourceAccount.picture ? (
+                <img
+                  src={sourceAccount.picture}
+                  alt="Profile"
+                  className="w-4 h-4 rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-4 h-4 rounded-full bg-primary-container flex items-center justify-center border border-outline-variant/20 overflow-hidden">
+                  <span className="font-headline font-bold text-[8px] text-on-primary-container">
+                    {sourceAccount.email.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+              )}
               <span className="text-xs font-headline font-bold text-on-surface-variant">
                 {sourceAccount.email}
               </span>
@@ -235,19 +244,21 @@ export default function Dashboard() {
               arrow_forward
             </span>
             <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-secondary text-sm">
-                check_circle
-              </span>
+              {destinationAccount.picture ? (
+                <img
+                  src={destinationAccount.picture}
+                  alt="Profile"
+                  className="w-4 h-4 rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-4 h-4 rounded-full bg-secondary-container flex items-center justify-center border border-outline-variant/20 overflow-hidden">
+                  <span className="font-headline font-bold text-[8px] text-on-secondary-container">
+                    {destinationAccount.email.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+              )}
               <span className="text-xs font-headline font-bold text-on-surface-variant">
                 {destinationAccount.email}
-              </span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <div className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center border border-outline-variant/20 overflow-hidden">
-              <span className="font-headline font-bold text-sm text-on-primary-container">
-                {sourceAccount.email.charAt(0).toUpperCase()}
               </span>
             </div>
           </div>

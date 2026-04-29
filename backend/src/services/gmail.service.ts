@@ -26,6 +26,17 @@ export async function listGmailAttachments(
   const files = [];
   for (const msg of response.data.messages || []) {
     const fullMsg = await gmail.users.messages.get({ userId: 'me', id: msg.id! });
+
+    const headers = fullMsg.data.payload?.headers || [];
+    const senderHeader = headers.find((h) => h.name?.toLowerCase() === 'from');
+    const subjectHeader = headers.find((h) => h.name?.toLowerCase() === 'subject');
+
+    let sender = senderHeader?.value || 'Unknown Sender';
+    if (sender.includes('<')) {
+      sender = sender.split('<')[0].trim();
+    }
+    const subject = subjectHeader?.value || 'No Subject';
+
     const parts = fullMsg.data.payload?.parts || [];
     for (const part of parts) {
       if (part.body?.attachmentId) {
@@ -34,6 +45,8 @@ export async function listGmailAttachments(
           name: part.filename || 'attachment',
           mimeType: part.mimeType || 'application/octet-stream',
           size: part.body.size?.toString() || '0',
+          sender,
+          subject,
         });
       }
     }

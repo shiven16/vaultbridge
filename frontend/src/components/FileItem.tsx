@@ -102,9 +102,18 @@ export default function FileItem({
           className={`font-headline font-semibold truncate ${
             isVirtual ? "text-outline" : "text-on-surface"
           }`}
+          title={file.sender ? `${file.sender}: ${file.subject}` : file.name}
         >
-          {file.name}
+          {file.sender ? `${file.sender}: ${file.subject}` : file.name}
         </h3>
+        {file.sender && (
+          <p
+            className="text-xs text-on-surface-variant font-body truncate mt-0.5"
+            title={file.name}
+          >
+            {file.name}
+          </p>
+        )}
         <p className="text-sm text-outline font-body italic mt-0.5 truncate">
           {formatFileSize(file.size)}
           {isVirtual && " • Workspace File (No direct sync)"}

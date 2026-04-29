@@ -41,6 +41,7 @@ export interface GoogleUserInfo {
   googleId: string;
   email: string;
   name: string;
+  picture: string;
 }
 
 export async function getUserInfo(accessToken: string): Promise<GoogleUserInfo> {
@@ -58,6 +59,7 @@ export async function getUserInfo(accessToken: string): Promise<GoogleUserInfo> 
     googleId: data.id,
     email: data.email,
     name: data.name ?? '',
+    picture: data.picture ?? '',
   };
 }
 

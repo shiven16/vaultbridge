@@ -10,6 +10,7 @@ import apiClient from "../utils/apiClient";
 export interface AccountInfo {
   email: string;
   name: string;
+  picture?: string;
 }
 
 export interface AuthState {
@@ -43,13 +44,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSourceAccountState({
           email: data.sourceEmail,
           name: data.user.name,
+          picture: data.sourcePicture,
         });
       } else {
         setSourceAccountState(null);
       }
 
       if (data.destConnected) {
-        setDestinationAccountState({ email: data.destEmail, name: "" });
+        setDestinationAccountState({
+          email: data.destEmail,
+          name: "",
+          picture: data.destPicture,
+        });
       } else {
         setDestinationAccountState(null);
       }

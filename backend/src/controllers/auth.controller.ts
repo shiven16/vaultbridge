@@ -41,6 +41,7 @@ export async function callback(req: Request, res: Response, next: NextFunction):
         where: { id: decoded.userId },
         data: {
           destEmail: userInfo.email,
+          destPicture: userInfo.picture,
           destAccessToken: tokens.accessToken,
           ...(encryptedRefreshToken && { destRefreshToken: encryptedRefreshToken }),
           destExpiryDate: new Date(tokens.expiryDate),
@@ -48,22 +49,30 @@ export async function callback(req: Request, res: Response, next: NextFunction):
       });
       logger.info(`User connected destination account: ${userInfo.email}`);
     } else {
-      // Source / Primary Login
+      // Source / Primary Login — always clear destination so stale sessions don't bleed over
       user = await prisma.user.upsert({
         where: { googleId: userInfo.googleId },
         update: {
           email: userInfo.email,
           name: userInfo.name,
           sourceEmail: userInfo.email,
+          sourcePicture: userInfo.picture,
           sourceAccessToken: tokens.accessToken,
           ...(encryptedRefreshToken && { sourceRefreshToken: encryptedRefreshToken }),
           sourceExpiryDate: new Date(tokens.expiryDate),
+          // Always reset destination so a fresh login never auto-populates stale accounts
+          destEmail: null,
+          destPicture: null,
+          destAccessToken: null,
+          destRefreshToken: null,
+          destExpiryDate: null,
         },
         create: {
           googleId: userInfo.googleId,
           email: userInfo.email,
           name: userInfo.name,
           sourceEmail: userInfo.email,
+          sourcePicture: userInfo.picture,
           sourceAccessToken: tokens.accessToken,
           ...(encryptedRefreshToken && { sourceRefreshToken: encryptedRefreshToken }),
           sourceExpiryDate: new Date(tokens.expiryDate),
@@ -109,8 +118,10 @@ export async function getMe(req: AuthRequest, res: Response, next: NextFunction)
       user: { id: user.id, email: user.email, name: user.name },
       sourceConnected: !!user.sourceEmail,
       sourceEmail: user.sourceEmail,
+      sourcePicture: user.sourcePicture,
       destConnected: !!user.destEmail,
       destEmail: user.destEmail,
+      destPicture: user.destPicture,
     });
   } catch (error) {
     next(error);
