@@ -74,7 +74,7 @@ export default function Callback() {
   return (
     <div className="flex min-h-screen items-center justify-center">
       <div className="flex flex-col items-center gap-4">
-        <div className="h-10 w-10 animate-spin rounded-full border-3 border-primary-500/20 border-t-primary-500" />
+        <div className="h-10 w-10 animate-spin rounded-full border-3 border-primary/20 border-t-primary" />
         <p className="text-sm text-surface-400">Authenticating…</p>
       </div>
     </div>

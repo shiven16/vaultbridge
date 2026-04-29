@@ -49,7 +49,7 @@ export async function callback(req: Request, res: Response, next: NextFunction):
       });
       logger.info(`User connected destination account: ${userInfo.email}`);
     } else {
-      // Source / Primary Login
+      // Source / Primary Login — always clear destination so stale sessions don't bleed over
       user = await prisma.user.upsert({
         where: { googleId: userInfo.googleId },
         update: {
@@ -60,6 +60,12 @@ export async function callback(req: Request, res: Response, next: NextFunction):
           sourceAccessToken: tokens.accessToken,
           ...(encryptedRefreshToken && { sourceRefreshToken: encryptedRefreshToken }),
           sourceExpiryDate: new Date(tokens.expiryDate),
+          // Always reset destination so a fresh login never auto-populates stale accounts
+          destEmail: null,
+          destPicture: null,
+          destAccessToken: null,
+          destRefreshToken: null,
+          destExpiryDate: null,
         },
         create: {
           googleId: userInfo.googleId,
