@@ -5,6 +5,8 @@ export interface DriveFile {
   name: string;
   mimeType: string;
   size: string;
+  sender?: string;
+  subject?: string;
 }
 
 export interface DriveFileListResponse {

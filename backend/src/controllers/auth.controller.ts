@@ -41,6 +41,7 @@ export async function callback(req: Request, res: Response, next: NextFunction):
         where: { id: decoded.userId },
         data: {
           destEmail: userInfo.email,
+          destPicture: userInfo.picture,
           destAccessToken: tokens.accessToken,
           ...(encryptedRefreshToken && { destRefreshToken: encryptedRefreshToken }),
           destExpiryDate: new Date(tokens.expiryDate),
@@ -55,6 +56,7 @@ export async function callback(req: Request, res: Response, next: NextFunction):
           email: userInfo.email,
           name: userInfo.name,
           sourceEmail: userInfo.email,
+          sourcePicture: userInfo.picture,
           sourceAccessToken: tokens.accessToken,
           ...(encryptedRefreshToken && { sourceRefreshToken: encryptedRefreshToken }),
           sourceExpiryDate: new Date(tokens.expiryDate),
@@ -64,6 +66,7 @@ export async function callback(req: Request, res: Response, next: NextFunction):
           email: userInfo.email,
           name: userInfo.name,
           sourceEmail: userInfo.email,
+          sourcePicture: userInfo.picture,
           sourceAccessToken: tokens.accessToken,
           ...(encryptedRefreshToken && { sourceRefreshToken: encryptedRefreshToken }),
           sourceExpiryDate: new Date(tokens.expiryDate),
@@ -109,8 +112,10 @@ export async function getMe(req: AuthRequest, res: Response, next: NextFunction)
       user: { id: user.id, email: user.email, name: user.name },
       sourceConnected: !!user.sourceEmail,
       sourceEmail: user.sourceEmail,
+      sourcePicture: user.sourcePicture,
       destConnected: !!user.destEmail,
       destEmail: user.destEmail,
+      destPicture: user.destPicture,
     });
   } catch (error) {
     next(error);

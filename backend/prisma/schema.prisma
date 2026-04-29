@@ -33,11 +33,13 @@ model User {
   createdAt DateTime @default(now())
 
   sourceEmail         String?
+  sourcePicture       String?
   sourceAccessToken   String?
   sourceRefreshToken  String?
   sourceExpiryDate    DateTime?
 
   destEmail           String?
+  destPicture         String?
   destAccessToken     String?
   destRefreshToken    String?
   destExpiryDate      DateTime?

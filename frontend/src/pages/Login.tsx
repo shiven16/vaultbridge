@@ -32,10 +32,15 @@ export default function Login() {
     <div className="font-body text-on-surface antialiased bg-surface min-h-screen">
       <main className="flex flex-col items-center justify-center p-6 md:p-12 min-h-screen">
         {/* Header Brand Anchor */}
-        <header className="mb-12 text-center">
-          <h1 className="font-headline text-3xl font-extrabold tracking-tight text-on-surface mb-2">
-            VaultBridge
-          </h1>
+        <header
+          className="mb-12 flex flex-col items-center justify-center cursor-pointer hover:opacity-80 transition-opacity"
+          onClick={() => navigate("/")}
+        >
+          <div className="flex items-center gap-1.5 mb-2">
+            <h1 className="font-headline text-3xl font-extrabold tracking-tight text-on-surface">
+              VaultBridge
+            </h1>
+          </div>
           <p className="font-headline text-sm uppercase tracking-widest font-bold text-outline">
             The Digital Atelier
           </p>
@@ -124,8 +129,16 @@ export default function Login() {
               {sourceAccount ? (
                 <div>
                   <div className="bg-surface-container-low rounded-lg p-4 flex items-center gap-4 mb-2">
-                    <div className="w-10 h-10 rounded-full border-2 border-primary-container bg-primary-fixed flex items-center justify-center text-on-primary-fixed font-bold">
-                      {sourceAccount.email.charAt(0).toUpperCase()}
+                    <div className="w-10 h-10 rounded-full border-2 border-primary-container bg-primary-fixed flex items-center justify-center text-on-primary-fixed font-bold overflow-hidden">
+                      {sourceAccount.picture ? (
+                        <img
+                          src={sourceAccount.picture}
+                          alt="Profile"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        sourceAccount.email.charAt(0).toUpperCase()
+                      )}
                     </div>
                     <div>
                       <p className="font-headline text-sm font-bold text-on-surface">
@@ -196,8 +209,16 @@ export default function Login() {
               {destinationAccount ? (
                 <div>
                   <div className="bg-surface-container-low rounded-lg p-4 flex items-center gap-4 mb-2">
-                    <div className="w-10 h-10 rounded-full border-2 border-secondary-container bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed font-bold">
-                      {destinationAccount.email.charAt(0).toUpperCase()}
+                    <div className="w-10 h-10 rounded-full border-2 border-secondary-container bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed font-bold overflow-hidden">
+                      {destinationAccount.picture ? (
+                        <img
+                          src={destinationAccount.picture}
+                          alt="Profile"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        destinationAccount.email.charAt(0).toUpperCase()
+                      )}
                     </div>
                     <div>
                       <p className="font-headline text-sm font-bold text-on-surface">
