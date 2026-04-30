@@ -2,10 +2,9 @@ import apiClient from "../utils/apiClient";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 
-export function getLoginUrl(type: "source" | "destination"): string {
-  return API_BASE_URL
-    ? `${API_BASE_URL}/auth/login?type=${type}`
-    : `/api/auth/login?type=${type}`;
+export async function getLoginUrl(type: "source" | "destination"): Promise<string> {
+  const response = await apiClient.get<{ url: string }>(`/auth/login?type=${type}`);
+  return response.data.url;
 }
 
 export interface CallbackResponse {

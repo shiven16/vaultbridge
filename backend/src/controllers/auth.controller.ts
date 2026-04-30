@@ -12,7 +12,7 @@ import { AuthRequest } from '../middlewares/auth.middleware.js';
 export function login(req: Request, res: Response): void {
   const type = req.query.type as string;
   const authUrl = googleService.getAuthUrl(type || 'source');
-  res.redirect(authUrl);
+  res.json({ url: authUrl });
 }
 
 export async function callback(req: Request, res: Response, next: NextFunction): Promise<void> {

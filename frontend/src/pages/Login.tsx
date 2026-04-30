@@ -1,54 +1,34 @@
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { getLoginUrl, disconnectAccount } from "../api/auth.api";
-import apiClient from "../utils/apiClient";
 
 export default function Login() {
   const navigate = useNavigate();
   const { sourceAccount, destinationAccount, isFullyConnected, refreshAuth } =
     useAuth();
-  const [serverReady, setServerReady] = useState(false);
-  const [serverWaking, setServerWaking] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
-  // Wake up backend (Render cold start) before user tries to authenticate
-  useEffect(() => {
-    let wakeTimer: ReturnType<typeof setTimeout>;
-    let cancelled = false;
-
-    const ping = async () => {
-      // Show "waking" state only after 1s delay (fast responses don't need it)
-      wakeTimer = setTimeout(() => {
-        if (!cancelled) setServerWaking(true);
-      }, 1000);
-
-      try {
-        await apiClient.get("/health");
-      } catch {
-        // Server responded with an error or timed out — still consider it awake
-        // (auth errors are expected on /health if it's protected)
-      } finally {
-        clearTimeout(wakeTimer);
-        if (!cancelled) {
-          setServerWaking(false);
-          setServerReady(true);
-        }
-      }
-    };
-
-    ping();
-    return () => {
-      cancelled = true;
-      clearTimeout(wakeTimer);
-    };
-  }, []);
-
-  const handleConnectSource = () => {
-    window.location.href = getLoginUrl("source");
+  const handleConnectSource = async () => {
+    setIsRedirecting(true);
+    try {
+      const url = await getLoginUrl("source");
+      window.location.href = url;
+    } catch (e) {
+      console.error("Failed to get login URL", e);
+      setIsRedirecting(false);
+    }
   };
 
-  const handleConnectDestination = () => {
-    window.location.href = getLoginUrl("destination");
+  const handleConnectDestination = async () => {
+    setIsRedirecting(true);
+    try {
+      const url = await getLoginUrl("destination");
+      window.location.href = url;
+    } catch (e) {
+      console.error("Failed to get login URL", e);
+      setIsRedirecting(false);
+    }
   };
 
   const handleDisconnect = async (type: "source" | "destination") => {
@@ -66,24 +46,13 @@ export default function Login() {
 
   return (
     <div className="font-body text-on-surface antialiased bg-surface min-h-screen">
-      {/* Render cold-start banner */}
-      {serverWaking && (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-surface/90 backdrop-blur-sm gap-4">
-          <div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
-          <p className="font-headline text-sm font-bold text-on-surface-variant uppercase tracking-widest">
-            Starting server…
-          </p>
-          <p className="text-xs text-outline max-w-xs text-center">
-            Our backend is waking up from sleep. This only takes a few seconds.
-          </p>
+      {/* Simple loader while redirecting */}
+      {isRedirecting && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-surface/90 backdrop-blur-sm">
+          <div className="w-10 h-10 border-3 border-primary/20 border-t-primary rounded-full animate-spin" />
         </div>
       )}
-      {/* Suppress interaction until server is confirmed awake */}
-      <div
-        className={
-          !serverReady ? "pointer-events-none select-none opacity-60" : ""
-        }
-      >
+      <div className={isRedirecting ? "pointer-events-none select-none opacity-60" : ""}>
         <main className="flex flex-col items-center justify-center p-6 md:p-12 min-h-screen">
           {/* Header Brand Anchor */}
           <header
