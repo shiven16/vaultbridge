@@ -23,10 +23,10 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.1",
     "express-rate-limit": "^7.4.1",
-    "googleapis": "^144.0.0",
+    "googleapis": "^171.4.0",
     "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.2",
-    "node-cron": "^3.0.3",
+    "node-cron": "^4.2.1",
     "winston": "^3.17.0",
     "zod": "^3.24.1"
   },
