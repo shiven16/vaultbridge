@@ -5,3 +5,10 @@ dist/
 .DS_Store
 
 stitch_dump/
+
+# Terraform
+.terraform/
+.terraform.*
+terraform.tfstate
+terraform.tfstate.*
+crash.log

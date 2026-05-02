@@ -1,109 +1,75 @@
-# name: Deploy
+name: Deploy to AWS
 
-# on:
-#   push:
-#     branches: [main]
+on:
+  push:
+    branches: [main]
 
-# jobs:
-#   deploy:
-#     name: Deploy to EC2
-#     runs-on: ubuntu-latest
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: vaultbridge-backend
+  ECS_CLUSTER: vaultbridge-cluster
+  ECS_SERVICE: vaultbridge-backend-service
 
-#     steps:
-#       - name: Checkout repository
-#         uses: actions/checkout@v4
+jobs:
+  deploy:
+    name: Build & Deploy
+    runs-on: ubuntu-latest
 
-#       - name: Setup SSH key
-#         run: |
-#           mkdir -p ~/.ssh
-#           echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/ec2_key
-#           chmod 600 ~/.ssh/ec2_key
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-#       - name: Deploy to EC2
-#         run: |
-#           ssh -o StrictHostKeyChecking=no -i ~/.ssh/ec2_key ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'DEPLOY_SCRIPT'
-#             set -e
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }} # Only needed if using AWS Academy / temporary credentials
+          aws-region: ${{ env.AWS_REGION }}
 
-#             # ──────────────────────────
-#             # Setup Node.js v20
-#             # ──────────────────────────
-#             # Load NVM to upgrade Node if it exists
-#             export NVM_DIR="$HOME/.nvm"
-#             if [ -s "$NVM_DIR/nvm.sh" ]; then
-#               \. "$NVM_DIR/nvm.sh"
-#               nvm install 20
-#               nvm use 20
-#               nvm alias default 20
-#               # Ensure pm2 is available on the new node version
-#               npm install -g pm2
-#             fi
-            
-#             # Verify node version and force upgrade via apt if needed
-#             NODE_MAJOR=$(node -v | cut -d. -f1 | sed 's/v//')
-#             if [ "$NODE_MAJOR" -lt 20 ]; then
-#                 echo "⚠️ Node.js is v$NODE_MAJOR. Upgrading to Node.js v20..."
-#                 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-#                 sudo apt-get install -y nodejs
-                
-#                 # Re-verify post-install
-#                 NODE_MAJOR_NEW=$(node -v | cut -d. -f1 | sed 's/v//')
-#                 if [ "$NODE_MAJOR_NEW" -lt 20 ]; then
-#                   echo "❌ Failed to install Node.js v20. Current version is v$NODE_MAJOR_NEW."
-#                   exit 1
-#                 fi
-#                 echo "✅ Successfully upgraded Node.js to v$NODE_MAJOR_NEW"
-                
-#                 # Reinstall pm2 globally for the new node version
-#                 sudo npm install -g pm2
-#             fi
+      # ──────────────────────────
+      # Backend Deployment
+      # ──────────────────────────
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
 
-#             APP_DIR=~/vaultbridge
+      - name: Build, tag, and push backend image to ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          cd backend
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
+          docker push -a $ECR_REGISTRY/$ECR_REPOSITORY
 
-#             # Clone or pull latest code
-#             if [ ! -d "$APP_DIR" ]; then
-#               git clone https://github.com/${{ github.repository }}.git "$APP_DIR"
-#             fi
+      - name: Force new ECS deployment
+        run: |
+          aws ecs update-service \
+            --cluster $ECS_CLUSTER \
+            --service $ECS_SERVICE \
+            --force-new-deployment \
+            --region ${{ env.AWS_REGION }}
 
-#             cd "$APP_DIR"
-#             git fetch origin main
-#             git reset --hard origin/main
+      # ──────────────────────────
+      # Frontend Deployment
+      # ──────────────────────────
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
-#             # ──────────────────────────
-#             # Backend
-#             # ──────────────────────────
-#             echo "Setting up backend..."
-#             cd "$APP_DIR/backend"
-            
-#             # Build the docker image
-#             docker build -t vaultbridge-backend .
-            
-#             # Stop existing container if it exists
-#             if docker ps -a --format '{{.Names}}' | grep -q "^vaultbridge-backend$"; then
-#               docker stop vaultbridge-backend
-#               docker rm vaultbridge-backend
-#             fi
-            
-#             # Run the new container, using host network so it can connect to local DB
-#             docker run -d --name vaultbridge-backend --network="host" --env-file .env vaultbridge-backend
+      - name: Build frontend
+        env:
+          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
+        run: |
+          cd frontend
+          npm ci
+          npm run build
 
-#             # ──────────────────────────
-#             # Frontend
-#             # ──────────────────────────
-#             echo "📦 Setting up frontend..."
-#             cd "$APP_DIR/frontend"
-#             npm install
-#             npm run build
+      - name: Sync frontend to S3
+        env:
+          S3_BUCKET: ${{ secrets.S3_BUCKET_NAME }}
+        run: |
+          aws s3 sync frontend/dist/ s3://$S3_BUCKET --delete
 
-#             # Serve frontend static files with PM2
-#             if pm2 describe vaultbridge-frontend > /dev/null 2>&1; then
-#               pm2 restart vaultbridge-frontend
-#             else
-#               pm2 start npx --name vaultbridge-frontend -- serve dist -s -l 4173
-#             fi
-
-#             echo "Deployment complete!"
-#           DEPLOY_SCRIPT
-
-#       - name: Cleanup SSH key
-#         if: always()
-#         run: rm -f ~/.ssh/ec2_key
