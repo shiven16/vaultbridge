@@ -18,7 +18,7 @@ resource "aws_lb_target_group" "api" {
     unhealthy_threshold = 10
     timeout             = 5
     interval            = 10
-    path                = "/api/health"
+    path                = "/health"
     port                = "traffic-port"
   }
 }
@@ -49,7 +49,7 @@ resource "aws_lb_listener_rule" "api" {
 
   condition {
     path_pattern {
-      values = ["/api/*"]
+      values = ["/*"]
     }
   }
 }
