@@ -1,9 +1,10 @@
 import { useNavigate } from "react-router-dom";
-import { useRef, useCallback } from "react";
+import { useRef, useCallback, useState } from "react";
 
 export default function Home() {
   const navigate = useNavigate();
   const heroRef = useRef<HTMLDivElement>(null);
+  const [isWarningModalOpen, setIsWarningModalOpen] = useState(false);
 
   // Mouse-tracking 3D tilt for the hero product showcase
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -77,6 +78,19 @@ export default function Home() {
               >
                 Try VaultBridge
                 <span className="material-symbols-outlined">arrow_forward</span>
+              </button>
+            </div>
+            {/* Caution Text */}
+            <div className="flex justify-center mt-6">
+              <button
+                onClick={() => setIsWarningModalOpen(true)}
+                className="text-red-500 hover:text-red-600 transition-colors flex items-center gap-1.5 font-medium text-sm md:text-base cursor-pointer underline underline-offset-4"
+              >
+                <span className="material-symbols-outlined text-lg">
+                  warning
+                </span>
+                Caution: App not verified by Google(Click here to read before
+                logging in)
               </button>
             </div>
           </div>
@@ -350,6 +364,118 @@ export default function Home() {
             <div className="absolute -bottom-20 -right-20 w-96 h-96 bg-tertiary/5 rounded-full blur-[100px] -z-10"></div>
           </div>
         </section>
+
+        {/* Warning Modal */}
+        {isWarningModalOpen && (
+          <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm overflow-y-auto flex justify-center items-start pt-20 pb-20 px-4">
+            <div className="bg-amber-50 dark:bg-[#1a130a] p-8 md:p-12 rounded-[2.5rem] border border-amber-200 dark:border-amber-800/30 shadow-2xl relative overflow-hidden max-w-5xl w-full animate-in fade-in zoom-in-95 duration-200">
+              {/* Close Button */}
+              <button
+                onClick={() => setIsWarningModalOpen(false)}
+                className="absolute top-6 right-6 w-10 h-10 flex items-center justify-center rounded-full bg-amber-200/50 hover:bg-amber-300 dark:bg-amber-800/50 dark:hover:bg-amber-700 text-amber-900 dark:text-amber-100 transition-colors z-20 cursor-pointer"
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
+
+              <div className="absolute top-0 right-0 w-64 h-64 bg-amber-400/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
+
+              <div className="relative z-10">
+                <div className="flex items-center gap-4 mb-6 pr-12">
+                  <div className="w-12 h-12 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                    <span className="material-symbols-outlined text-2xl">
+                      gpp_maybe
+                    </span>
+                  </div>
+                  <h3 className="font-headline font-bold text-3xl text-amber-900 dark:text-amber-100 tracking-tight">
+                    Google Verification Pending
+                  </h3>
+                </div>
+
+                <p className="font-body text-lg text-amber-800/80 dark:text-amber-200/80 mb-10 max-w-3xl leading-relaxed">
+                  VaultBridge is currently in active development and has not yet
+                  been verified by Google to use their APIs. When you sign in
+                  with Google, you will see an unverified app warning. To
+                  proceed and use the application, please follow these two
+                  simple steps when trying to log in using Google:
+                </p>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                  {/* Step 1 */}
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-amber-200 dark:bg-amber-800 text-amber-900 dark:text-amber-100 flex items-center justify-center font-bold font-headline">
+                        1
+                      </div>
+                      <h4 className="font-headline font-bold text-xl text-amber-900 dark:text-amber-100">
+                        Click on "Advanced"
+                      </h4>
+                    </div>
+                    <div className="relative rounded-2xl overflow-hidden border border-amber-200 dark:border-amber-800/50 shadow-lg bg-white dark:bg-surface-container group">
+                      <img
+                        src="/click_advanced.png"
+                        alt="Click Advanced text"
+                        className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                      />
+
+                      {/* CSS Pointer Tooltip - Image 1 */}
+                      <div
+                        className="absolute flex flex-col items-center animate-pulse z-10"
+                        style={{
+                          top: "46.3%",
+                          left: "31%",
+                          transform: "translate(-100%, -50%)",
+                        }}
+                      >
+                        <span className="text-3xl filter drop-shadow-lg">
+                          👉
+                        </span>
+                        <div className="text-primary text-sm font-extrabold mt-1 whitespace-nowrap drop-shadow-md bg-transparent">
+                          Click here
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Step 2 */}
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-amber-200 dark:bg-amber-800 text-amber-900 dark:text-amber-100 flex items-center justify-center font-bold font-headline">
+                        2
+                      </div>
+                      <h4 className="font-headline font-bold text-xl text-amber-900 dark:text-amber-100">
+                        Click "Go to VaultBridge"
+                      </h4>
+                    </div>
+                    <div className="relative rounded-2xl overflow-hidden border border-amber-200 dark:border-amber-800/50 shadow-lg bg-white dark:bg-surface-container group">
+                      <img
+                        src="/click_vaultbridge.png"
+                        alt="Click Go to Vaultbridge"
+                        className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                      />
+
+                      {/* CSS Pointer Tooltip - Image 2 */}
+                      <div
+                        className="absolute flex flex-col items-center animate-pulse z-10"
+                        style={{
+                          top: "62.5%",
+                          left: "31%",
+                          transform: "translate(-100%, -50%)",
+                        }}
+                      >
+                        <span className="text-3xl filter drop-shadow-lg">
+                          👉
+                        </span>
+                        <div className="text-primary text-sm font-extrabold mt-1 whitespace-nowrap drop-shadow-md bg-transparent">
+                          Click here
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Bento Grid Feature Section */}
         <section className="bg-surface-container-low py-32 px-6">

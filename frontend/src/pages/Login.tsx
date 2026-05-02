@@ -52,7 +52,11 @@ export default function Login() {
           <div className="w-10 h-10 border-3 border-primary/20 border-t-primary rounded-full animate-spin" />
         </div>
       )}
-      <div className={isRedirecting ? "pointer-events-none select-none opacity-60" : ""}>
+      <div
+        className={
+          isRedirecting ? "pointer-events-none select-none opacity-60" : ""
+        }
+      >
         <main className="flex flex-col items-center justify-center p-6 md:p-12 min-h-screen">
           {/* Header Brand Anchor */}
           <header
