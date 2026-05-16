@@ -1,0 +1,33 @@
+name: Keep Render Backend Awake
+
+on:
+  schedule:
+    - cron: "* * * * *"   # every 1 minute
+  workflow_dispatch:      # allows manual trigger
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Ping Render with retries
+        run: |
+          echo "Starting ping..."
+
+          for i in {1..12}
+          do
+            echo "Attempt $i..."
+
+            response=$(curl -s -o /dev/null -w "%{http_code}" https://vaultbridge-pn2x.onrender.com/health)
+
+            if [ "$response" -eq 200 ]; then
+              echo "Success! Server is awake."
+              exit 0
+            fi
+
+            echo "Failed with status $response. Retrying in 10s..."
+            sleep 10
+          done
+
+          echo "All attempts failed."
+          exit 1
